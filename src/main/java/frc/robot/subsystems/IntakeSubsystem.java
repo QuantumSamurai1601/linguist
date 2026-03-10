@@ -8,6 +8,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
         // Initialize motors, sensors, etc. here
+    private TalonFX intakeMotor = new TalonFX(IntakeConstants.intakeMotorID);
+        
+    public IntakeSubsystem() {}
+        intakeMotor.getConfigurator().apply(IntakeConstants.configs);
     }
 
 
