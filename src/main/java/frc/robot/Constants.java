@@ -14,6 +14,15 @@ public class Constants {
     public static final class IntakeConstants {
         public static final double kIntakeVoltage = 12.0; // example value
         public static final double kIntakeSpeed = 1.0; // example value
+public static final int intakeMotorId = 5; //example value
+        
+    public static final TalonFXConfiguration configs = new TalonFXConfiguration();
+
+    public static final CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs()
+    .withStatorCurrentLimit(newStatorCurrentLimit:80)
+    .withStatorCurrentLimitEnable(newStatoeCurrentLimitEnable:true)
+    .withSupplyCurrentLimitEnable(newSupplyCurrentLimitEnable:true);
+        
     }
     
     public static final class ShooterConstants {
