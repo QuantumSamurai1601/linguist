@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.*;
 
 public class IntakeSubsystem extends SubsystemBase {
-    private statuc Intake sInstance = null;
+    private static Intake sInstance = null;
 
     public static Intake getInstance() {
         if (sInstance == null) {
@@ -16,6 +16,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem() {
         // Initialize motors, sensors, etc. here
     private TalonFX intakeMotor = new TalonFX(IntakeConstants.intakeMotorID);
+    
         
     public IntakeSubsystem() {}
         intakeMotor.getConfigurator().apply(IntakeConstants.configs);
