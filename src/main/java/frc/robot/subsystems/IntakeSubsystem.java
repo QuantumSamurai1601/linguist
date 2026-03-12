@@ -4,7 +4,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.*;
 
 public class IntakeSubsystem extends SubsystemBase {
-    private boolean isArmExtended = false;
+    private statuc Intake sInstance = null;
+
+    public static Intake getInstance() {
+        if (sInstance == null) {
+            sInstance = new Intake();
+    }
+        return sInstance;
+    }
 
     public IntakeSubsystem() {
         // Initialize motors, sensors, etc. here
@@ -36,6 +43,8 @@ m_motor.set(0.5);
         // Code to retract the intake arm
         setIntakeSpeed(-IntakeConstants.kIntakeSpeed);
         isArmExtended = false;
+        setPosition(Constants.Intake.Arm.stowAngle);
+        rollerMotor.set(0.0);
     }
 
     public boolean isArmExtended(){
