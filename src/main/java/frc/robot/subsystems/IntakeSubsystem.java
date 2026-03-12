@@ -4,6 +4,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.*;
 
 public class IntakeSubsystem extends SubsystemBase {
+private static final TalonFX armMotor = new TalonFX(Constants.Intake.Arm.deviceID);
+private static final TalonFXSimState armMotorSim = armMotor.getSimState();
+
+private static final TalonFX rollerMotor = new TalonFX(Constants.Intake.Roller.deviceID);
+private static final TalonFXSimState rollerMotorSim = rollerMotor.getSimState();
+    
     private static Intake sInstance = null;
 
     public static Intake getInstance() {
@@ -15,16 +21,19 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
         // Initialize motors, sensors, etc. here
-    private TalonFX intakeMotor = new TalonFX(IntakeConstants.intakeMotorID);
-    
-        
-    public IntakeSubsystem() {}
         intakeMotor.getConfigurator().apply(IntakeConstants.configs);
-    }
-
+        TalonFXConfiguration armConfig = new TalonFXConfiguration();
+    private TalonFX intakeMotor = new TalonFX(IntakeConstants.intakeMotorID);
+        
 /* Apply a current configuration to the motor */
     intakeMotor.getConfigurator().refresh(IntakeConstants.currentLimits);
 intakeMotor.getConfigurator().apply(IntakeConstants.currentLimits);
+         TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
+        rollerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        rollerMotor.getConfigurator().apply(rollerConfig);
+
+    armMotor.setPosition(Constants.Intake.Arm.startingAngle);
+        retract();
 }
 
     public void setIntakeSpeed(double speed) {
