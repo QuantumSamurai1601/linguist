@@ -1,0 +1,97 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems.intake;
+
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+
+public class Intake extends SubsystemBase {
+  private final TalonFX intakeRoller = new TalonFX(0);
+  private final TalonFX intakeExtend = new TalonFX(0);
+
+  private final VoltageOut intakeRollerRequest = new VoltageOut(0).withEnableFOC(true);
+  private final PositionVoltage intakeExtendRequest = new PositionVoltage(0).withEnableFOC(true);
+  private final NeutralOut neutral = new NeutralOut();
+
+  private final Debouncer debouncer = new Debouncer(0.2);
+  
+  /** Creates a new Intake. */
+  public Intake() {
+    intakeRoller.getConfigurator().apply(IntakeConstants.intakeRollerConfig);
+    intakeExtend.getConfigurator().apply(IntakeConstants.intakeExtendConfig);
+
+    intakeExtend.setPosition(0);
+  }
+
+  public void setIntakeVolts(double volts) {
+    intakeRoller.setControl(intakeRollerRequest.withOutput(volts));
+  }
+
+  public void stopIntake() {
+    intakeRoller.setControl(neutral);
+  }
+
+  private void setIntakePos(double pos) {
+    intakeExtend.setControl(intakeExtendRequest.withPosition(pos));
+  }
+
+  public Command homeIntakeExtend() {
+    return new SequentialCommandGroup(
+      new StartEndCommand(
+        () -> intakeExtend.setControl(new DutyCycleOut(0.1)),
+        () -> intakeExtend.setControl(neutral)
+      ).withTimeout(0.5),
+      new InstantCommand(() -> {
+        intakeExtend.getConfigurator().apply(IntakeConstants.homingConfig);
+        intakeExtend.setControl(new DutyCycleOut(IntakeConstants.INTAKE_HOMING_DUTY_CYCLE_OUT));
+      }),
+      new WaitUntilCommand(() ->
+        debouncer.calculate(intakeExtend.getStatorCurrent().getValueAsDouble() > IntakeConstants.INTAKE_HOMING_STATOR_CURRENT_THRES && Math.abs(intakeExtend.getVelocity().getValueAsDouble()) < IntakeConstants.INTAKE_HOMING_MAX_VELOCITY_THRES)
+      ).withTimeout(5),
+      new InstantCommand(() -> {
+        intakeExtend.setControl(neutral);
+        intakeExtend.setNeutralMode(NeutralModeValue.Coast);
+      }),
+      new WaitCommand(0.5),
+      new InstantCommand(() -> {
+        intakeExtend.setPosition(0);
+        intakeExtend.setNeutralMode(NeutralModeValue.Brake);
+        intakeExtend.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(false));
+        intakeExtend.getConfigurator().apply(IntakeConstants.intakeExtendConfig);
+      })
+    );
+  }
+
+  public Command extendIntake() {
+    return this.runOnce(() -> this.setIntakePos(IntakeConstants.INTAKE_EXTEND_POS));
+  }
+
+  public Command stowIntake() {
+    return this.runOnce(() -> this.setIntakePos(IntakeConstants.INTAKE_STOW_POS));
+  }
+
+  public Command runIntake() {
+    return this.runOnce(() -> this.setIntakeVolts(IntakeConstants.INTAKING_VOLTS));
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+  }
+}
