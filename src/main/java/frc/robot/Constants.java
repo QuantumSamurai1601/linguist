@@ -28,5 +28,6 @@ public class Constants {
     public static final class TowerConstants {
         public static final double kFeedVoltage = 12.0; // example value
         public static final double kFeedSpeed = 1.0; // example value
+        public static final int TowerMotorId = 33;
     }
 }
