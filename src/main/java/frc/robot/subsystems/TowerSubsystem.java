@@ -44,6 +44,12 @@ public class TowerSubsystem extends SubsystemBase {
         motor = new TalonFX(Constants.TowerConstants.TowerMotorId); // gets motor from ID (id is 33)
 
         TalonFXConfiguration configs = new TalonFXConfiguration(); // creates configs
+           configs.withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted(InvertedValue.CounterClockwise_Positive)
+                    .withNeutralMode(NeutralModeValue.Coast)
+            );
+           
          configs.withCurrentLimits( // limits currents prevents damage
             new CurrentLimitsConfigs()
                 .withStatorCurrentLimit(Amps.of(120))
