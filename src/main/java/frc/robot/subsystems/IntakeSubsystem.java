@@ -49,14 +49,25 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public boolean isArmExtended() {
-        return true;
+        return isArmExtended;
     }
 
-    public double getArmPosition() {
+   public double getArmPosition() {
     return armMotor.getPosition().getValueAsDouble();
-    public boolean isBallDetected() {
-        return false;
-    }
+}
+
+public boolean isBallDetected() {
+    return false;
+}
+    private double m_lastRollerSpeed = 0.0;
+
+public void setIntakeSpeed(double speed) {
+    rollerMotor.set(TalonFXControlMode.PercentOutput, speed);
+    m_lastRollerSpeed = speed;
+}
+
+public boolean isIntakeRunning() {
+    return Math.abs(m_lastRollerSpeed) > 0.1;
 }
 
 public boolean isIdle() {
