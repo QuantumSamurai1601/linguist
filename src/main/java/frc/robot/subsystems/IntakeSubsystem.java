@@ -1,79 +1,64 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.InvertedValue;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
+import com.ctre.phoenix.motorcontrol.TalonFXConfiguration;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.*;
+import frc.robot.Constants;
 
 public class IntakeSubsystem extends SubsystemBase {
-private static final TalonFX armMotor = new TalonFX(Constants.Intake.Arm.deviceID);
-private static final TalonFXSimState armMotorSim = armMotor.getSimState();
+    private static final TalonFX armMotor = new TalonFX(Constants.Intake.Arm.deviceID);
+    private static final TalonFXSimState armMotorSim = armMotor.getSimState();
 
-private static final TalonFX rollerMotor = new TalonFX(Constants.Intake.Roller.deviceID);
-private static final TalonFXSimState rollerMotorSim = rollerMotor.getSimState();
-    
-    private static Intake sInstance = null;
+    private static final TalonFX rollerMotor = new TalonFX(Constants.Intake.Roller.deviceID);
+    private static final TalonFXSimState rollerMotorSim = rollerMotor.getSimState();
 
-    public static Intake getInstance() {
+    private static IntakeSubsystem sInstance = null;
+
+    public static IntakeSubsystem getInstance() {
         if (sInstance == null) {
-            sInstance = new Intake();
-    }
+            sInstance = new IntakeSubsystem();
+        }
         return sInstance;
     }
 
+    private boolean isArmExtended = false;
+
     public IntakeSubsystem() {
-        // Initialize motors, sensors, etc. here
-        intakeMotor.getConfigurator().apply(IntakeConstants.configs);
-        TalonFXConfiguration armConfig = new TalonFXConfiguration();
-    private TalonFX intakeMotor = new TalonFX(IntakeConstants.intakeMotorID);
-        
-/* Apply a current configuration to the motor */
-    intakeMotor.getConfigurator().refresh(IntakeConstants.currentLimits);
-intakeMotor.getConfigurator().apply(IntakeConstants.currentLimits);
-         TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
+        TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
         rollerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         rollerMotor.getConfigurator().apply(rollerConfig);
-
-    armMotor.setPosition(Constants.Intake.Arm.startingAngle);
-        retract();
-}
+        armMotor.setPosition(Constants.Intake.Arm.startingAngle);
+        retractArm();
+    }
 
     public void setIntakeSpeed(double speed) {
-        // Set the speed of the intake motor
-        private final TalonFX m_motor = new TalonFX(1, MotorType.kBrushless);
-m_motor.setInverted(false);
-m_motor.set(0.5);
+        rollerMotor.set(TalonFXControlMode.PercentOutput, speed);
     }
 
     public void extendArm() {
-        // Code to extend the intake arm
-        setIntakeSpeed(IntakeConstants.kIntakeSpeed);
+        setIntakeSpeed(Constants.Intake.Roller.kIntakeSpeed);
         isArmExtended = true;
     }
 
     public void retractArm() {
-        // Code to retract the intake arm
-        setIntakeSpeed(-IntakeConstants.kIntakeSpeed);
+        setIntakeSpeed(0.0);
+        armMotor.setPosition(Constants.Intake.Arm.stowAngle);
         isArmExtended = false;
-        setPosition(Constants.Intake.Arm.stowAngle);
-        rollerMotor.set(0.0);
     }
 
-    public boolean isArmExtended(){
-        return isArmExtended;
-        boolean isArmExtended = true;
-        return false; // Placeholder
-        if (isArmExtended) {
-         return true; 
-             } else {
-            return false;
+    public boolean isArmExtended() {
+        return true;
     }
 
+    public double getArmPosition() {
+    return armMotor.getPosition().getValueAsDouble();
     public boolean isBallDetected() {
-        // Return true if a ball is detected in the intake
-        boolean isBallDetected = true;
-        return false; // Placeholder
-        if (isBallDetected) {
-         return true; 
-             } else {
-            return false;
+        return false;
     }
+}
+
+public boolean isIdle() {
+    return !isArmExtended() && !isIntakeRunning();
 }
