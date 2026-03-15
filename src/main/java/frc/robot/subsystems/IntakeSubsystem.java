@@ -33,10 +33,6 @@ public class IntakeSubsystem extends SubsystemBase {
         retractArm();
     }
 
-    public void setIntakeSpeed(double speed) {
-        rollerMotor.set(TalonFXControlMode.PercentOutput, speed);
-    }
-
     public void extendArm() {
         setIntakeSpeed(Constants.Intake.Roller.kIntakeSpeed);
         isArmExtended = true;
