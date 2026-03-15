@@ -18,7 +18,7 @@ public class IntakeConstants {
 
   public static final TalonFXConfiguration intakeExtendConfig = new TalonFXConfiguration();
   static {
-    intakeRollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    intakeExtendConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     intakeExtendConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast; // Change after tuning
 
     intakeExtendConfig.CurrentLimits.SupplyCurrentLimit = 40;
@@ -48,8 +48,7 @@ public class IntakeConstants {
   public static final double INTAKE_STOW_POS = 2;
   public static final double INTAKE_EXTEND_POS = 3;
 
-  public static final double INTAKE_HOMING_DUTY_CYCLE_OUT = -0.1;
+  public static final double INTAKE_HOMING_DUTY_CYCLE_OUT = 0.1;
   public static final double INTAKE_HOMING_STATOR_CURRENT_THRES = 10;
   public static final double INTAKE_HOMING_MAX_VELOCITY_THRES = 1;
-
 }

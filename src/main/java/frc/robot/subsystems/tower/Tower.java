@@ -15,7 +15,7 @@ import frc.robot.subsystems.hopper.HopperConstants;
 public class Tower extends SubsystemBase {
   private final TalonFX tower = new TalonFX(0);
 
-  private final VelocityVoltage towerRequest = new VelocityVoltage(0);
+  private final VelocityVoltage towerRequest = new VelocityVoltage(0).withSlot(0).withEnableFOC(true);
   private final NeutralOut neutral = new NeutralOut();
 
   /** Creates a new Tower. */

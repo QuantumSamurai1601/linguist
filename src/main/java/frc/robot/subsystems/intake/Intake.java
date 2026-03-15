@@ -26,7 +26,7 @@ public class Intake extends SubsystemBase {
   private final TalonFX intakeExtend = new TalonFX(0);
 
   private final VoltageOut intakeRollerRequest = new VoltageOut(0).withEnableFOC(true);
-  private final PositionVoltage intakeExtendRequest = new PositionVoltage(0).withEnableFOC(true);
+  private final PositionVoltage intakeExtendRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
   private final NeutralOut neutral = new NeutralOut();
 
   private final Debouncer debouncer = new Debouncer(0.2);
@@ -53,10 +53,6 @@ public class Intake extends SubsystemBase {
 
   public Command homeIntakeExtend() {
     return new SequentialCommandGroup(
-      new StartEndCommand(
-        () -> intakeExtend.setControl(new DutyCycleOut(0.1)),
-        () -> intakeExtend.setControl(neutral)
-      ).withTimeout(0.5),
       new InstantCommand(() -> {
         intakeExtend.getConfigurator().apply(IntakeConstants.homingConfig);
         intakeExtend.setControl(new DutyCycleOut(IntakeConstants.INTAKE_HOMING_DUTY_CYCLE_OUT));
