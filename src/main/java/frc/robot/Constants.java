@@ -7,6 +7,8 @@ public class Constants {
     }
 
     public static final class HopperConstants {
+        public static final int HopperMotorId = 34;
+        public static final int HopperSensorId = 35;
         public static final double kHopperVoltage = 12.0; // example value
         public static final double kHopperSpeed = 1.0; // example value
     }
