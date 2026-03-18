@@ -93,7 +93,7 @@ public class TurretConstants {
     homingConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
   }
 
-  public static final double INTAKE_HOMING_DUTY_CYCLE_OUT = 0.1;
-  public static final double INTAKE_HOMING_STATOR_CURRENT_THRES = 10;
-  public static final double INTAKE_HOMING_MAX_VELOCITY_THRES = 1;
+  public static final double TURRET_HOMING_DUTY_CYCLE_OUT = 0.1;
+  public static final double TURRET_HOMING_STATOR_CURRENT_THRES = 10;
+  public static final double TURRET_HOMING_MAX_VELOCITY_THRES = 1;
 }
