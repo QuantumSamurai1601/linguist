@@ -16,14 +16,13 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 public class Intake extends SubsystemBase {
-  private final TalonFX intakeRoller = new TalonFX(0);
-  private final TalonFX intakeExtend = new TalonFX(0);
+  private final TalonFX intakeRoller = new TalonFX(44);
+  private final TalonFX intakeExtend = new TalonFX(45);
 
   private final VoltageOut intakeRollerRequest = new VoltageOut(0).withEnableFOC(true);
   private final PositionVoltage intakeExtendRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(true);

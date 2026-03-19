@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Hopper extends SubsystemBase {
-  private final TalonFX hopper = new TalonFX(0);
+  private final TalonFX hopper = new TalonFX(34);
   
   private final VelocityVoltage hopperRequest = new VelocityVoltage(0).withSlot(0).withEnableFOC(true);
   private final NeutralOut neutral = new NeutralOut();
