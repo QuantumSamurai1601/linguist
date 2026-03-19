@@ -4,7 +4,12 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.util.Units;
+import frc.robot.AllianceFlipUtil;
+import frc.robot.subsystems.vision.VisionConstants;
 
 public class TurretConstants {
   public static final TalonFXConfiguration turretConfig = new TalonFXConfiguration();
@@ -63,6 +68,7 @@ public class TurretConstants {
     shooterLeaderConfig.Feedback.SensorToMechanismRatio = 1.64;
   }
 
+  /*
   public static final InterpolatingDoubleTreeMap shooterTreeMap = new InterpolatingDoubleTreeMap();
   static {
       shooterTreeMap.put(0.0, 0.175);
@@ -73,6 +79,7 @@ public class TurretConstants {
       shooterTreeMap.put(2.5, 0.115);
       shooterTreeMap.put(3.0, 0.115);
   }
+  */
 
   public static final InterpolatingDoubleTreeMap hoodTreeMap = new InterpolatingDoubleTreeMap();
   static {
@@ -96,4 +103,32 @@ public class TurretConstants {
   public static final double TURRET_HOMING_DUTY_CYCLE_OUT = 0.1;
   public static final double TURRET_HOMING_STATOR_CURRENT_THRES = 10;
   public static final double TURRET_HOMING_MAX_VELOCITY_THRES = 1;
+
+  public static final double TURRET_ZERO_OFFSET_DEG = 90.0;
+  public static final Translation2d ROBOT_TO_TURRET_METERS = new Translation2d();
+
+  public static Translation3d getHubCenterMeters() {
+    return AllianceFlipUtil.apply(new Translation3d(
+      VisionConstants.aprilTagLayout.getTagPose(26).get().getX() + Units.inchesToMeters(47.0) / 2.0,
+      VisionConstants.aprilTagLayout.getFieldWidth() / 2.0,
+      Units.inchesToMeters(72)));
+  }
+
+  public static Translation2d getClosestFerryPoint(Translation2d current) {
+    // Also technically upper red point
+    Translation2d lowerBluePoint = AllianceFlipUtil.apply(new Translation2d(
+      Units.inchesToMeters(45),
+      VisionConstants.aprilTagLayout.getFieldWidth() / 4.0
+    ));
+    // Also technically lower red point
+    Translation2d higherBluePoint = AllianceFlipUtil.apply(new Translation2d(
+      Units.inchesToMeters(45),
+      (VisionConstants.aprilTagLayout.getFieldWidth() / 4.0) * 3.0
+    ));
+
+    Translation2d closerPoint =
+    current.getDistance(lowerBluePoint) < current.getDistance(higherBluePoint) ? lowerBluePoint : higherBluePoint;
+
+    return closerPoint;
+  }
 }
