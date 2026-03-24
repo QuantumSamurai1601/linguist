@@ -11,18 +11,28 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.tower.Tower;
+import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionLimelight;
 
@@ -50,21 +60,47 @@ public class RobotContainer {
 
     /* Create all subsystems */
     private final Vision vision;
+    private final Hopper hopper = new Hopper();
+    private final Intake intake = new Intake();
+    private final Tower tower = new Tower();
+    public final Turret turret;
 
     public RobotContainer() {
-        autoChooser = AutoBuilder.buildAutoChooser("Tests");
+        DataLogManager.start();
+        NamedCommands.registerCommand("intakeextend", Commands.sequence(
+            intake.extendIntake()
+        ));
+        NamedCommands.registerCommand("shootmfl", Commands.deadline(
+            new WaitCommand(4),
+            hopper.runHopperShoot(),
+            tower.runTowerShoot()
+        ).finallyDo(() -> {
+            hopper.stopHopper();
+            tower.stopTower();
+        }));
+        NamedCommands.registerCommand("shootmfr", Commands.deadline(
+            new WaitCommand(4),
+            hopper.runHopperShoot(),
+            tower.runTowerShoot()
+        ).finallyDo(() -> {
+            hopper.stopHopper();
+            tower.stopTower();
+        }));
+        autoChooser = AutoBuilder.buildAutoChooser("MFRLONG");
         SmartDashboard.putData("Auto Mode", autoChooser);
-
-        configureBindings();
-
-        // Warmup PathPlanner to avoid Java pauses
-        FollowPathCommand.warmupCommand().schedule();
 
         vision =
             new Vision(
                 drivetrain::addVisionMeasurement,
                 new VisionLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()),
                 new VisionLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
+
+        turret = new Turret(drivetrain);
+
+        configureBindings();
+
+        // Warmup PathPlanner to avoid Java pauses
+        FollowPathCommand.warmupCommand().schedule();
     }
 
     private void configureBindings() {
@@ -87,26 +123,54 @@ public class RobotContainer {
         );
 
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
+        // joystick.b().whileTrue(drivetrain.applyRequest(() ->
+        //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        // ));
 
-        joystick.povUp().whileTrue(drivetrain.applyRequest(() ->
-            forwardStraight.withVelocityX(0.5).withVelocityY(0))
-        );
-        joystick.povDown().whileTrue(drivetrain.applyRequest(() ->
-            forwardStraight.withVelocityX(-0.5).withVelocityY(0))
-        );
+        // joystick.povUp().whileTrue(drivetrain.applyRequest(() ->
+        //     forwardStraight.withVelocityX(0.5).withVelocityY(0))
+        // );
+
+        // joystick.povDown().whileTrue(drivetrain.applyRequest(() ->
+        //     forwardStraight.withVelocityX(-0.5).withVelocityY(0))
+        // );
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
+        joystick.b().onTrue(Commands.either(
+            intake.stowIntake(),
+            intake.extendIntake(),
+            () -> intake.isIntakeExtended
+        ));
+
+        joystick.x().whileTrue(hopper.runHopperUnstuck());
+        joystick.x().onFalse(hopper.runOnce(() -> hopper.stopHopper()));
+
+        joystick.back().onTrue(turret.runOnce(() -> turret.toggleTracking()));        
+
+        joystick.rightTrigger(0.5).onTrue(Commands.parallel(
+            hopper.runHopperShoot(),
+            tower.runTowerShoot()
+            // turret.turretShoot()
+        ));
+
+        joystick.rightTrigger(0.5).onFalse(Commands.parallel(
+            hopper.runOnce(() -> hopper.stopHopper()),
+            tower.runOnce(() -> tower.stopTower())
+            // turret.turretShoot()
+        ));
+
+        joystick.povUp().onTrue(turret.runOnce(() -> turret.hoodInchUp()));
+
+        joystick.povDown().onTrue(turret.runOnce(() -> turret.hoodInchDown()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

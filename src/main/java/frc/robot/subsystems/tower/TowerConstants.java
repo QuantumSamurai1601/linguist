@@ -13,14 +13,14 @@ public class TowerConstants {
     towerConfig.CurrentLimits.SupplyCurrentLimit = 20;
     towerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    towerConfig.Slot0.kS = 0;
-    towerConfig.Slot0.kV = 0;
-    towerConfig.Slot0.kP = 0;
+    towerConfig.Slot0.kS = 0.41;
+    towerConfig.Slot0.kV = 0.1;
+    towerConfig.Slot0.kP = 0.41;
     towerConfig.Slot0.kD = 0;
 
     towerConfig.Feedback.SensorToMechanismRatio = 3;
   }
 
-  public static final double TOWER_SHOOT_VELOCITY = 0;
-  public static final double TOWER_UNSTUCK_VELOCITY = 0;
+  public static final double TOWER_SHOOT_VELOCITY = 24;
+  public static final double TOWER_UNSTUCK_VELOCITY = -24;
 }

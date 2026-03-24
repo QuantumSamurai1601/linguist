@@ -28,7 +28,11 @@ public class Intake extends SubsystemBase {
   private final PositionVoltage intakeExtendRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
   private final NeutralOut neutral = new NeutralOut();
 
-  private final Debouncer debouncer = new Debouncer(0.2);
+  private final Debouncer debouncer = new Debouncer(0.1);
+
+  public boolean isIntakeWheelOn = false;
+  public boolean isIntakeExtended = false;
+  public boolean hasIntakeHomed = false;
   
   /** Creates a new Intake. */
   public Intake() {
@@ -42,7 +46,18 @@ public class Intake extends SubsystemBase {
     intakeRoller.setControl(intakeRollerRequest.withOutput(volts));
   }
 
-  public void stopIntake() {
+  public void toggleIntake() {
+    if (isIntakeWheelOn == false) {
+      this.setIntakeVolts(IntakeConstants.INTAKING_VOLTS);
+      isIntakeWheelOn = true;
+    } else if (isIntakeWheelOn == true) {
+      this.setIntakeNeutral();
+      isIntakeWheelOn = false;
+    }
+  }
+
+  public void setIntakeNeutral() {
+    isIntakeWheelOn = false;
     intakeRoller.setControl(neutral);
   }
 
@@ -58,31 +73,71 @@ public class Intake extends SubsystemBase {
       }),
       new WaitUntilCommand(() ->
         debouncer.calculate(intakeExtend.getStatorCurrent().getValueAsDouble() > IntakeConstants.INTAKE_HOMING_STATOR_CURRENT_THRES && Math.abs(intakeExtend.getVelocity().getValueAsDouble()) < IntakeConstants.INTAKE_HOMING_MAX_VELOCITY_THRES)
-      ).withTimeout(5),
+      ).withTimeout(2),
       new InstantCommand(() -> {
         intakeExtend.setControl(neutral);
-        intakeExtend.setNeutralMode(NeutralModeValue.Coast);
+        intakeExtend.setNeutralMode(NeutralModeValue.Brake);
       }),
       new WaitCommand(0.5),
       new InstantCommand(() -> {
         intakeExtend.setPosition(0);
-        intakeExtend.setNeutralMode(NeutralModeValue.Brake);
+        hasIntakeHomed = true;
+        intakeExtend.setNeutralMode(NeutralModeValue.Coast);
         intakeExtend.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(false));
         intakeExtend.getConfigurator().apply(IntakeConstants.intakeExtendConfig);
+        intakeExtend.setControl(intakeExtendRequest.withPosition(IntakeConstants.INTAKE_STOW_POS));
+      })
+    );
+  }
+  
+  public boolean getHasIntakeHomed() {
+    return this.hasIntakeHomed;
+  }
+
+  public Command extendIntake() {
+    return new SequentialCommandGroup(
+      new InstantCommand(() -> {
+        this.setIntakePos(IntakeConstants.INTAKE_EXTEND_POS);
+        this.isIntakeExtended = true;
+        if (intakeExtend.getPosition().getValueAsDouble() < 0.1) {
+          this.setIntakeVolts(IntakeConstants.OUTAKING_VOLTS);
+        }
+      }),
+
+      new WaitCommand(IntakeConstants.INTAKE_EXTEND_ASSIST_TIME_SEC),
+
+      new InstantCommand(() -> this.setIntakeNeutral()),
+
+      new InstantCommand(() -> {
+        this.setIntakeVolts(IntakeConstants.INTAKING_VOLTS);
+        this.isIntakeWheelOn = true;
       })
     );
   }
 
-  public Command extendIntake() {
-    return this.runOnce(() -> this.setIntakePos(IntakeConstants.INTAKE_EXTEND_POS));
-  }
-
   public Command stowIntake() {
-    return this.runOnce(() -> this.setIntakePos(IntakeConstants.INTAKE_STOW_POS));
+    return this.runOnce(() -> {
+      this.setIntakePos(IntakeConstants.INTAKE_STOW_POS);
+      this.isIntakeExtended = false;
+      this.setIntakeNeutral();
+      this.isIntakeWheelOn = false;
+    });
   }
 
   public Command runIntake() {
-    return this.runOnce(() -> this.setIntakeVolts(IntakeConstants.INTAKING_VOLTS));
+    return this.runOnce(() -> {
+      this.setIntakeVolts(IntakeConstants.INTAKING_VOLTS);
+      this.isIntakeWheelOn = true;
+    });
+  }
+  public Command runOutake() {
+    return this.runOnce(() -> this.setIntakeVolts(IntakeConstants.OUTAKING_VOLTS));
+  }
+  public Command stopIntake() {
+    return this.runOnce(() -> {
+      this.setIntakeNeutral();
+      isIntakeWheelOn = false;
+    });
   }
 
   @Override

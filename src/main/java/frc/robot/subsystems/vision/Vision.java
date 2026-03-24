@@ -63,10 +63,10 @@ public class Vision extends SubsystemBase {
     }
 
     // Initialize logging values
-    List<Pose3d> allTagPoses = new LinkedList<>();
-    List<Pose3d> allRobotPoses = new LinkedList<>();
-    List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
-    List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+    // List<Pose3d> allTagPoses = new LinkedList<>();
+    // List<Pose3d> allRobotPoses = new LinkedList<>();
+    // List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
+    // List<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < limelights.length; cameraIndex++) {
@@ -75,9 +75,9 @@ public class Vision extends SubsystemBase {
 
       // Initialize logging values
       List<Pose3d> tagPoses = new LinkedList<>();
-      List<Pose3d> robotPoses = new LinkedList<>();
-      List<Pose3d> robotPosesAccepted = new LinkedList<>();
-      List<Pose3d> robotPosesRejected = new LinkedList<>();
+      // List<Pose3d> robotPoses = new LinkedList<>();
+      // List<Pose3d> robotPosesAccepted = new LinkedList<>();
+      // List<Pose3d> robotPosesRejected = new LinkedList<>();
 
       // Add tag poses
       for (int tagId : inputs[cameraIndex].tagIds) {
@@ -91,8 +91,8 @@ public class Vision extends SubsystemBase {
       for (var observation : inputs[cameraIndex].poseObservations) {
         // Check whether to reject pose
         boolean rejectPose =
-            observation.tagCount() == 0 // Must have at least one tag
-                || (observation.tagCount() == 1
+            observation.tagCount() <= 1 // Must have at least one tag
+                || (observation.tagCount() >= 2
                     && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
                 || Math.abs(observation.pose().getZ())
                     > maxZError // Must have realistic Z coordinate
@@ -104,12 +104,12 @@ public class Vision extends SubsystemBase {
                 || observation.pose().getY() > aprilTagLayout.getFieldWidth();
 
         // Add pose to log
-        robotPoses.add(observation.pose());
-        if (rejectPose) {
-          robotPosesRejected.add(observation.pose());
-        } else {
-          robotPosesAccepted.add(observation.pose());
-        }
+        // robotPoses.add(observation.pose());
+        // if (rejectPose) {
+        //   robotPosesRejected.add(observation.pose());
+        // } else {
+        //   robotPosesAccepted.add(observation.pose());
+        // }
 
         // Skip if rejected
         if (rejectPose) {
@@ -150,10 +150,10 @@ public class Vision extends SubsystemBase {
       // Logger.recordOutput(
       //     "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesRejected",
       //     robotPosesRejected.toArray(new Pose3d[0]));
-      allTagPoses.addAll(tagPoses);
-      allRobotPoses.addAll(robotPoses);
-      allRobotPosesAccepted.addAll(robotPosesAccepted);
-      allRobotPosesRejected.addAll(robotPosesRejected);
+      // allTagPoses.addAll(tagPoses);
+      // allRobotPoses.addAll(robotPoses);
+      // allRobotPosesAccepted.addAll(robotPosesAccepted);
+      // allRobotPosesRejected.addAll(robotPosesRejected);
     }
 
     // Log summary data

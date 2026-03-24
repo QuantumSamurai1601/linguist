@@ -14,20 +14,22 @@ import frc.robot.subsystems.vision.VisionConstants;
 public class TurretConstants {
   public static final TalonFXConfiguration turretConfig = new TalonFXConfiguration();
   static {
-    turretConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    turretConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     turretConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast; // Change after tuning
 
-    turretConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    turretConfig.CurrentLimits.SupplyCurrentLimit = 20;
     turretConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0;
+    turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.923;
     turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
     turretConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = false; // Change after tuning
     turretConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false; // Change after turning
 
-    turretConfig.Slot0.kS = 0;
-    turretConfig.Slot0.kP = 0;
+    turretConfig.Slot0.kS = 0.28;
+    turretConfig.Slot0.kP = 50;
     turretConfig.Slot0.kD = 0;
+    turretConfig.MotionMagic.MotionMagicCruiseVelocity = 5;
+    turretConfig.MotionMagic.MotionMagicAcceleration = 4.5;
 
     turretConfig.Feedback.SensorToMechanismRatio = 35;
   }
@@ -37,16 +39,16 @@ public class TurretConstants {
     hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast; // Change after tuning
 
-    hoodConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    hoodConfig.CurrentLimits.SupplyCurrentLimit = 10;
     hoodConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0;
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.085;
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = false; // Change after tuning
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false; // Change after turning
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-    hoodConfig.Slot0.kS = 0;
-    hoodConfig.Slot0.kP = 0;
+    hoodConfig.Slot0.kS = 0.385;
+    hoodConfig.Slot0.kP = 1000;
     hoodConfig.Slot0.kD = 0;
 
     hoodConfig.Feedback.SensorToMechanismRatio = 214.3;
@@ -57,39 +59,31 @@ public class TurretConstants {
     shooterLeaderConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     shooterLeaderConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-    shooterLeaderConfig.CurrentLimits.SupplyCurrentLimit = 20;
+    shooterLeaderConfig.CurrentLimits.SupplyCurrentLimit = 40;
     shooterLeaderConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    shooterLeaderConfig.Slot0.kS = 0;
-    shooterLeaderConfig.Slot0.kV = 0;
-    shooterLeaderConfig.Slot0.kP = 0;
+    shooterLeaderConfig.Slot0.kS = 0.24;
+    shooterLeaderConfig.Slot0.kV = 0.475;
+    shooterLeaderConfig.Slot0.kP = 0.85;
     shooterLeaderConfig.Slot0.kD = 0;
 
     shooterLeaderConfig.Feedback.SensorToMechanismRatio = 1.64;
   }
 
-  /*
   public static final InterpolatingDoubleTreeMap shooterTreeMap = new InterpolatingDoubleTreeMap();
   static {
-      shooterTreeMap.put(0.0, 0.175);
-      shooterTreeMap.put(0.5, 0.13);
-      shooterTreeMap.put(1.0, 0.115);
-      shooterTreeMap.put(1.5, 0.115);
-      shooterTreeMap.put(2.0, 0.115);
-      shooterTreeMap.put(2.5, 0.115);
-      shooterTreeMap.put(3.0, 0.115);
+    shooterTreeMap.put(1.77, 28.0);
+    shooterTreeMap.put(2.82, 34.0);
+    shooterTreeMap.put(3.79, 39.0);
+    shooterTreeMap.put(4.75, 44.0);
+    shooterTreeMap.put(5.75, 60.0);
   }
-  */
 
   public static final InterpolatingDoubleTreeMap hoodTreeMap = new InterpolatingDoubleTreeMap();
   static {
-      hoodTreeMap.put(0.0, 0.175);
-      hoodTreeMap.put(0.5, 0.13);
-      hoodTreeMap.put(1.0, 0.115);
-      hoodTreeMap.put(1.5, 0.115);
-      hoodTreeMap.put(2.0, 0.115);
-      hoodTreeMap.put(2.5, 0.115);
-      hoodTreeMap.put(3.0, 0.115);
+    hoodTreeMap.put(1.77, 0.0);
+    hoodTreeMap.put(2.82, 0.0);
+    hoodTreeMap.put(3.79, 0.0);
   }
 
   public static final TalonFXConfiguration homingConfig = new TalonFXConfiguration();
@@ -105,7 +99,7 @@ public class TurretConstants {
   public static final double TURRET_HOMING_MAX_VELOCITY_THRES = 1;
 
   public static final double TURRET_ZERO_OFFSET_DEG = 90.0;
-  public static final Translation2d ROBOT_TO_TURRET_METERS = new Translation2d();
+  public static final Translation2d ROBOT_TO_TURRET_METERS = new Translation2d(Units.inchesToMeters(5.21), 0);
 
   public static Translation3d getHubCenterMeters() {
     return AllianceFlipUtil.apply(new Translation3d(
@@ -131,4 +125,7 @@ public class TurretConstants {
 
     return closerPoint;
   }
+
+  public static final double TURRET_SHOOTING_RPS = 50;
+
 }

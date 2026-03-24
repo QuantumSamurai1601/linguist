@@ -18,10 +18,10 @@ public class IntakeConstants {
 
   public static final TalonFXConfiguration intakeExtendConfig = new TalonFXConfiguration();
   static {
-    intakeExtendConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    intakeExtendConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast; // Change after tuning
+    intakeExtendConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    intakeExtendConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-    intakeExtendConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    intakeExtendConfig.CurrentLimits.SupplyCurrentLimit = 20;
     intakeExtendConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     intakeExtendConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0;
@@ -29,8 +29,8 @@ public class IntakeConstants {
     intakeExtendConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = false; // Change after tuning
     intakeExtendConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false; // Change after turning
 
-    intakeExtendConfig.Slot0.kS = 0;
-    intakeExtendConfig.Slot0.kP = 0;
+    intakeExtendConfig.Slot0.kS = 0.43;
+    intakeExtendConfig.Slot0.kP = 300;
     intakeExtendConfig.Slot0.kD = 0;
 
     intakeExtendConfig.Feedback.SensorToMechanismRatio = 66;
@@ -38,17 +38,20 @@ public class IntakeConstants {
 
   public static final TalonFXConfiguration homingConfig = new TalonFXConfiguration();
   static {
-    homingConfig.CurrentLimits.StatorCurrentLimit = 30;
+    homingConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    homingConfig.CurrentLimits.StatorCurrentLimit = 50;
     homingConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     homingConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
     homingConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
   }
 
-  public static final double INTAKING_VOLTS = 11.0;
-  public static final double INTAKE_STOW_POS = 2;
-  public static final double INTAKE_EXTEND_POS = 3;
+  public static final double INTAKING_VOLTS = 7.6;
+  public static final double OUTAKING_VOLTS = -7.6;
+  public static final double INTAKE_EXTEND_ASSIST_TIME_SEC = 0.5;
+  public static final double INTAKE_STOW_POS = 0.32;
+  public static final double INTAKE_EXTEND_POS = 0.73;
 
-  public static final double INTAKE_HOMING_DUTY_CYCLE_OUT = 0.1;
-  public static final double INTAKE_HOMING_STATOR_CURRENT_THRES = 10;
-  public static final double INTAKE_HOMING_MAX_VELOCITY_THRES = 1;
+  public static final double INTAKE_HOMING_DUTY_CYCLE_OUT = 0.25;
+  public static final double INTAKE_HOMING_STATOR_CURRENT_THRES = 30;
+  public static final double INTAKE_HOMING_MAX_VELOCITY_THRES = 0.72;
 }

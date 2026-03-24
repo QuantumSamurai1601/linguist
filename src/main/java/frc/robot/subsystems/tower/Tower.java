@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.HopperConstants;
 
 public class Tower extends SubsystemBase {
-  private final TalonFX tower = new TalonFX(0);
+  private final TalonFX tower = new TalonFX(33);
 
   private final VelocityVoltage towerRequest = new VelocityVoltage(0).withSlot(0).withEnableFOC(true);
   private final NeutralOut neutral = new NeutralOut();
