@@ -23,6 +23,11 @@ public class Constants {
 
         public static final double kShootingHoodAngle = 45.0; // degrees, example value
         public static final double kPassingHoodAngle = 30.0; // degrees, example value
+
+        public static final int HoodMotorId = 21;
+        public static final int TurretMotorId = 22;
+        public static final int ShooterLeftMotorId = 28;
+        public static final int ShooterRightMotorId = 29;
     }
 
     public static final class TowerConstants {

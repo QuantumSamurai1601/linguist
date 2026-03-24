@@ -10,6 +10,8 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
+
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 // | configs + signals + hardware |//
@@ -23,10 +25,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-// |controls| //
-import com.ctre.phoenix6.controls.VelocityVoltage;
-
-//unsure on what these are, edit later
+//communication to dashboard
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,8 +35,9 @@ import frc.robot.Constants;
 public class TowerSubsystem extends SubsystemBase {
     private boolean isFeeding = false;
 
+    // || MOTORS + VELOCITY SET UP //
     private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0); // initial voltage
-     private final TalonFX motor; //creates motor variable from the TalonFX class
+    private final TalonFX motor; //creates motor variable from the TalonFX class
 
     public TowerSubsystem() {
         // Initialize motors, sensors, etc. here
@@ -49,27 +49,26 @@ public class TowerSubsystem extends SubsystemBase {
                     .withInverted(InvertedValue.CounterClockwise_Positive)
                     .withNeutralMode(NeutralModeValue.Coast)
             );
-           
-         configs.withCurrentLimits( // limits currents prevents damage
-            new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(Amps.of(120))
-                .withStatorCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(Amps.of(50))
-                .withSupplyCurrentLimitEnable(true)
-    );
-        configs.withSlot0(
-                    new Slot0Configs()
-                        .withKP(1)
-                        .withKI(0)
-                        .withKD(0)
-                        .withKV(Constants.TowerConstants.kFeedVoltage/ Constants.TowerConstants.kFeedSpeed) // 12 volts when requesting max RPS
-                );
+            configs.withCurrentLimits( // limits currents prevents damage
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(Amps.of(120))
+                    .withStatorCurrentLimitEnable(true)
+                    .withSupplyCurrentLimit(Amps.of(50))
+                    .withSupplyCurrentLimitEnable(true)
+            );
+            configs.withSlot0(
+                new Slot0Configs()
+                    .withKP(1)
+                    .withKI(0)
+                    .withKD(0)
+                    .withKV(Constants.TowerConstants.kFeedVoltage/ Constants.TowerConstants.kFeedSpeed) // 12 volts when requesting max RPS
+            );
 
     motor.getConfigurator().apply(configs); //applies configs
-    SmartDashboard.putData(this); // sends data to reading apps (dont know exactly)
-        
+    SmartDashboard.putData(this); // sends data to reading apps (dont know exactly)  
     }
 
+    
     private void setTowerSpeed(double speed) {
         // Code to set the speed of the tower motor
         motor.setControl(
