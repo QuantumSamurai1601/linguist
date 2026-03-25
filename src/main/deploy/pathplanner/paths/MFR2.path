@@ -1,0 +1,181 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.521166755413187,
+        "y": 0.5915190778459829
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.521166755413187,
+        "y": 0.5915190778459829
+      },
+      "isLocked": false,
+      "linkedName": "HONEYMUSTARDCHICKEN"
+    },
+    {
+      "anchor": {
+        "x": 5.696912809475302,
+        "y": 0.5915190778459829
+      },
+      "prevControl": {
+        "x": 5.451649411642987,
+        "y": 0.5430849402594861
+      },
+      "nextControl": {
+        "x": 6.415018470651411,
+        "y": 0.7333291836442617
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.530191882654952,
+        "y": 2.2467804699225975
+      },
+      "prevControl": {
+        "x": 7.3644124697229545,
+        "y": 1.3189900718651386
+      },
+      "nextControl": {
+        "x": 7.660154472072108,
+        "y": 2.974120737543054
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.824667414773274,
+        "y": 3.7059561856274534
+      },
+      "prevControl": {
+        "x": 7.561605323829087,
+        "y": 3.71987771846978
+      },
+      "nextControl": {
+        "x": 6.06198858139673,
+        "y": 3.6915483796284345
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.995373565974494,
+        "y": 2.7696949234384625
+      },
+      "prevControl": {
+        "x": 5.98109363297817,
+        "y": 3.3713849823617377
+      },
+      "nextControl": {
+        "x": 6.00764319509121,
+        "y": 2.2527097339348257
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.579498449616832,
+        "y": 1.6535295510879293
+      },
+      "prevControl": {
+        "x": 6.39904756818499,
+        "y": 1.9626441662417258
+      },
+      "nextControl": {
+        "x": 6.873893701217607,
+        "y": 1.1492268057668915
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.2079837336798604,
+        "y": 0.7296129115814063
+      },
+      "prevControl": {
+        "x": 6.451830536029269,
+        "y": 0.7847376517981874
+      },
+      "nextControl": {
+        "x": 5.1212751521970254,
+        "y": 0.48394830713131154
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.521166755413187,
+        "y": 0.5915190778459829
+      },
+      "prevControl": {
+        "x": 4.849423923750817,
+        "y": 0.6289034768983073
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "HONEYMUSTARDCHICKEN"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 1.7865631295450073,
+      "rotationDegrees": -89.0
+    },
+    {
+      "waypointRelativePos": 3.4128431404161748,
+      "rotationDegrees": 90.61857482583427
+    },
+    {
+      "waypointRelativePos": 5.584881668570656,
+      "rotationDegrees": 179.31830442555344
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 1.8607250056104134,
+      "maxWaypointRelativePos": 4.950811142981374,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "MFR",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}

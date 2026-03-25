@@ -1,0 +1,149 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.6633484202417836,
+        "y": 7.437410525430013
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.286630167843673,
+        "y": 7.5440174583848485
+      },
+      "isLocked": false,
+      "linkedName": "BBQCHICK"
+    },
+    {
+      "anchor": {
+        "x": 7.192718109732191,
+        "y": 6.091451743741341
+      },
+      "prevControl": {
+        "x": 6.819628834177653,
+        "y": 7.039726237370237
+      },
+      "nextControl": {
+        "x": 7.571404684935493,
+        "y": 5.1289506913826814
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.4734186873412485,
+        "y": 4.140314146145224
+      },
+      "prevControl": {
+        "x": 7.1934522419740174,
+        "y": 4.141017269660228
+      },
+      "nextControl": {
+        "x": 5.812663452984029,
+        "y": 4.139668908794896
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.906184399985328,
+        "y": 5.293426121303014
+      },
+      "prevControl": {
+        "x": 5.909792102258021,
+        "y": 4.90405773948986
+      },
+      "nextControl": {
+        "x": 5.90140458280817,
+        "y": 5.809297315475389
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.318270634994132,
+        "y": 7.154078527741832
+      },
+      "prevControl": {
+        "x": 6.835698968295394,
+        "y": 6.716869107326263
+      },
+      "nextControl": {
+        "x": 5.853645222990339,
+        "y": 7.546671267680272
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.6633484202417836,
+        "y": 7.437410525430013
+      },
+      "prevControl": {
+        "x": 3.4134599422431657,
+        "y": 7.444877021498055
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "BBQCHICK"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 0.9213669495012778,
+      "rotationDegrees": 89.9
+    },
+    {
+      "waypointRelativePos": 2.3499103282232707,
+      "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 4.3335507950692795,
+      "rotationDegrees": 180.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 1.030889267981373,
+      "maxWaypointRelativePos": 3.966334015933572,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "MFL",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}

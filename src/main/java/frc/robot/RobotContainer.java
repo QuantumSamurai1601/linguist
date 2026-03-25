@@ -5,18 +5,24 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -25,12 +31,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.HopperSubsystem;
-import frc.robot.subsystems.TowerSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
-
+import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.tower.Tower;
+import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionLimelight;
 
 public class RobotContainer {
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -63,9 +69,44 @@ public class RobotContainer {
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
 
+    /* Create all subsystems */
+    private final Vision vision;
+    private final Hopper hopper = new Hopper();
+    private final Intake intake = new Intake();
+    private final Tower tower = new Tower();
+    public final Turret turret;
+
     public RobotContainer() {
-        autoChooser = AutoBuilder.buildAutoChooser("Tests");
+        DataLogManager.start();
+        NamedCommands.registerCommand("intakeextend", Commands.sequence(
+            intake.extendIntake()
+        ));
+        NamedCommands.registerCommand("shootmfl", Commands.deadline(
+            new WaitCommand(4),
+            hopper.runHopperShoot(),
+            tower.runTowerShoot()
+        ).finallyDo(() -> {
+            hopper.stopHopper();
+            tower.stopTower();
+        }));
+        NamedCommands.registerCommand("shootmfr", Commands.deadline(
+            new WaitCommand(4),
+            hopper.runHopperShoot(),
+            tower.runTowerShoot()
+        ).finallyDo(() -> {
+            hopper.stopHopper();
+            tower.stopTower();
+        }));
+        autoChooser = AutoBuilder.buildAutoChooser("MFRLONG");
         SmartDashboard.putData("Auto Mode", autoChooser);
+
+        vision =
+            new Vision(
+                drivetrain::addVisionMeasurement,
+                new VisionLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()),
+                new VisionLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
+
+        turret = new Turret(drivetrain);
 
         configureBindings();
 
@@ -92,117 +133,55 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        /*** Controller mappings ***/
+        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        // joystick.b().whileTrue(drivetrain.applyRequest(() ->
+        //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        // ));
 
-        // ── LT – Hopper roller toggle ON / OFF ────────────────────────────────────
-        // The roller silently does nothing if the arm is not extended.
-        joystick.leftTrigger().onTrue(
-            Commands.runOnce(() -> {
-                if (hopper.isRunning()) {
-                    hopper.stopHopper();
-                } else {
-                    hopper.runHopper();   // HopperSubsystem needs to guard against Intake retracted state
-                }
-            })
-        );
+        // joystick.povUp().whileTrue(drivetrain.applyRequest(() ->
+        //     forwardStraight.withVelocityX(0.5).withVelocityY(0))
+        // );
 
-        // ── RT – Shoot sequence (hold) ────────────────────────────────────────────
-        // 1. Spin flywheel to the speed for the current mode (SHOOTING or PASSING).
-        // 2. Block until flywheel reports isAtSpeed().
-        // 3. Feed fuel from tower up into the shooter.
-        // 4. On RT release → whileTrue interrupts → finallyDo coasts + stops feed.
-        joystick.rightTrigger().whileTrue(
-            Commands.parallel(
-                // Branch A: keep flywheel at the right speed for the whole hold
-                Commands.run(() -> shooter.setSpeed(
-                    scoringMode == ScoringMode.SHOOTING
-                        ? ShooterConstants.kShootingRPS
-                        : ShooterConstants.kPassingRPS
-                ), shooter),
-                // Branch B: wait for speed, then feed
-                Commands.waitUntil(shooter::isAtSpeed)
-                        .andThen(Commands.run(() -> tower.feedToShooter(), tower))
-            ).finallyDo((interrupted) -> {
-                shooter.coast();
-                tower.stopFeeding();
-            })
-        );
-
-        // ── A – Intake arm extend / retract toggle ────────────────────────────────
-        // Retracting also stops the roller automatically.
-        joystick.a().onTrue(
-            Commands.runOnce(() -> {
-                if (intake.isArmExtended()) {
-                    intake.retractArm();   // retractArm() calls stopIntake() internally
-                } else {
-                    intake.extendArm();
-                }
-            })
-        );
-
-        // ── Y – Toggle Shooting ↔ Passing mode ────────────────────────────────────
-        // Shooting mode → full flywheel speed, hood at shooting angle, aims at hub.
-        // Passing mode → lower flywheel speed, hood at loft angle, aims at trench tags.
-        joystick.y().onTrue(
-            Commands.runOnce(() -> {
-                if (scoringMode == ScoringMode.SHOOTING) {
-                    scoringMode = ScoringMode.PASSING;
-                } else {
-                    scoringMode = ScoringMode.SHOOTING;
-                }
-            })
-        );
-
-        // ── X – Manual hood override ──────────────────────────────────────────────
-        // If extended → retract. If retracted → extend
-        joystick.x().onTrue(
-            Commands.runOnce(() -> {
-                if (shooter.isHoodExtended()) {
-                    shooter.retractHood();
-                } else {
-                    shooter.extendHood();
-                }
-            })
-        );
-
-        // ── Auto-retract hood near the trench ────────────────────────────────────
-        // Logic-driven trigger — no button press needed. Fires whenever the robot
-        // enters the trench proximity zone (odometry or vision). Restores the
-        // mode-appropriate angle when the robot leaves.
-        new Trigger(this::isNearTrench)
-            .onTrue(Commands.runOnce(() -> {
-                scoringMode = ScoringMode.PASSING;
-                shooter.retractHood();
-            }))
-            .onFalse(Commands.runOnce(() -> {
-                scoringMode = ScoringMode.SHOOTING;
-                shooter.extendHood();
-            }));
-
-        // ── LB – X-lock wheels (defensive) ──────────────────────────────────────
-        joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> brake));
-
-        // ── RB – Re-seed field-centric heading ────────────────────────────────
-        joystick.rightBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-
-        // Hold the D-pad up/down to drive straight forward/backward at 0.5 m/s
-        joystick.povUp().whileTrue(drivetrain.applyRequest(() ->
-            forwardStraight.withVelocityX(0.5).withVelocityY(0))
-        );
-        joystick.povDown().whileTrue(drivetrain.applyRequest(() ->
-            forwardStraight.withVelocityX(-0.5).withVelocityY(0))
-        );
+        // joystick.povDown().whileTrue(drivetrain.applyRequest(() ->
+        //     forwardStraight.withVelocityX(-0.5).withVelocityY(0))
+        // );
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        // Hold back + Y to run the forward dynamic routine, which will sweep the robot forward through a range of speeds.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        // Hold back + X to run the reverse dynamic routine, which will sweep the robot backward through a range of speeds.
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        // Hold start + Y to run the forward quasistatic routine, which will slowly increase the robot's speed until it reaches max speed.
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        // Hold start + X to run the reverse quasistatic routine, which will slowly increase the robot's speed until it reaches max speed.
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+        // Reset the field-centric heading on left bumper press.
+        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
+        joystick.b().onTrue(Commands.either(
+            intake.stowIntake(),
+            intake.extendIntake(),
+            () -> intake.isIntakeExtended
+        ));
+
+        joystick.x().whileTrue(hopper.runHopperUnstuck());
+        joystick.x().onFalse(hopper.runOnce(() -> hopper.stopHopper()));
+
+        joystick.back().onTrue(turret.runOnce(() -> turret.toggleTracking()));        
+
+        joystick.rightTrigger(0.5).onTrue(Commands.parallel(
+            hopper.runHopperShoot(),
+            tower.runTowerShoot()
+            // turret.turretShoot()
+        ));
+
+        joystick.rightTrigger(0.5).onFalse(Commands.parallel(
+            hopper.runOnce(() -> hopper.stopHopper()),
+            tower.runOnce(() -> tower.stopTower())
+            // turret.turretShoot()
+        ));
+
+        joystick.povUp().onTrue(turret.runOnce(() -> turret.hoodInchUp()));
+
+        joystick.povDown().onTrue(turret.runOnce(() -> turret.hoodInchDown()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -211,10 +190,4 @@ public class RobotContainer {
         /* Run the path selected from the auto chooser */
         return autoChooser.getSelected();
     }
-
-    private boolean isNearTrench() {
-        // Could use odometry to check the robot's position
-        return false;
-    }
-
- }
+}

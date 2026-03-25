@@ -25,7 +25,7 @@ public class TunerConstants {
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     private static final Slot0Configs steerGains = new Slot0Configs()
         .withKP(100).withKI(0).withKD(0.5)
-        .withKS(0.1).withKV(1.16).withKA(0)
+        .withKS(0.1).withKV(1.91).withKA(0)
         .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
@@ -42,7 +42,7 @@ public class TunerConstants {
 
     // The type of motor used for the drive motor
     private static final DriveMotorArrangement kDriveMotorType = DriveMotorArrangement.TalonFX_Integrated;
-    // The type of motor used for the drive motor
+    // The type of motor used for the steer motor
     private static final SteerMotorArrangement kSteerMotorType = SteerMotorArrangement.TalonFX_Integrated;
 
     // The remote sensor feedback type to use for the steer motors;
@@ -55,7 +55,14 @@ public class TunerConstants {
 
     // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
-    private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration();
+    private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration()
+        .withCurrentLimits(
+            new CurrentLimitsConfigs()
+                // Default supply current limit is 70 A, but it can be lowered to avoid brownouts.
+                // Supply current limits can be larger than the breaker current rating.
+.withSupplyCurrentLimit(Amps.of(60))
+                .withSupplyCurrentLimitEnable(true)
+        );
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
         .withCurrentLimits(
             new CurrentLimitsConfigs()
@@ -70,10 +77,11 @@ public class TunerConstants {
 
     // CAN bus that the devices are located on;
     // All swerve devices must share the same CAN bus
-    public static final CANBus kCANBus = new CANBus("Default Name", "./logs/example.hoot");
+    public static final CANBus kCANBus = new CANBus("Drivetrain", "./logs/example.hoot");
 
-    // Theoretical free speed (m/s) at 12 V applied output;
-    // This needs to be tuned to your individual robot
+    // Measured robot speed (m/s) at 12 V applied output;
+    // This is NOT the desired max robot speed - see MaxSpeed in RobotContainer instead;
+   // This needs to be tuned to your individual robot
     public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(4.76);
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
@@ -91,7 +99,7 @@ public class TunerConstants {
 
     // These are only used for simulation
     private static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.01);
-    private static final MomentOfInertia kDriveInertia = KilogramSquareMeters.of(0.01);
+    private static final MomentOfInertia kDriveInertia = KilogramSquareMeters.of(0.035);
     // Simulated voltage necessary to overcome friction
     private static final Voltage kSteerFrictionVoltage = Volts.of(0.2);
     private static final Voltage kDriveFrictionVoltage = Volts.of(0.2);
@@ -262,10 +270,10 @@ public class TunerConstants {
          *                                  unspecified or set to 0 Hz, this is 250 Hz on
          *                                  CAN FD, and 100 Hz on CAN 2.0.
          * @param odometryStandardDeviation The standard deviation for odometry calculation
-         *                                  in the form [x, y, theta]áµ€, with units in meters
+         *                                  in the form [x, y, theta]ᵀ, with units in meters
          *                                  and radians
          * @param visionStandardDeviation   The standard deviation for vision calculation
-         *                                  in the form [x, y, theta]áµ€, with units in meters
+         *                                  in the form [x, y, theta]ᵀ, with units in meters
          *                                  and radians
          * @param modules                   Constants for each specific module
          */

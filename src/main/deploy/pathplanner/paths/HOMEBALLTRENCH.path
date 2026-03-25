@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.423374215338428,
+        "y": 4.958714292212519
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.211118504595336,
+        "y": 2.9494532471097985
+      },
+      "isLocked": false,
+      "linkedName": "HBO"
+    },
+    {
+      "anchor": {
+        "x": 0.5875999690868241,
+        "y": 0.6359735819498702
+      },
+      "prevControl": {
+        "x": 1.4685792419998736,
+        "y": 1.143750920048467
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
