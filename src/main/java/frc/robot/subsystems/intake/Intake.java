@@ -34,6 +34,28 @@ public class Intake extends SubsystemBase {
   public boolean isIntakeExtended = false;
   public boolean hasIntakeHomed = false;
   
+    public double getIntakeExtendPosition() {
+    return intakeExtend.getPosition().getValueAsDouble();
+
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("Intake");
+    speedPub = table.getDoubleTopic("Speed").publish();
+    atTargetPub = table.getBooleanTopic("AtTarget").publish();
+
+    setpointPub.set(TARGET_RPS);
+  }
+
+  public double getIntakeRollerPosition() {
+    return intakeRoller.getPosition().getValueAsDouble();
+  }
+
+  public double getIntakeRollerVelocity() {
+    return intakeRoller.getVelocity().getValueAsDouble();
+  }
+
+  public boolean atTargetSpeed() {
+    return Math.abs(intakeRoller.getVelocity().getValueAsDouble() - IntakeConstants.TARGET_RPS) < IntakeConstants.ROLLER_VELOCITY_TOLERANCE_RPS;
+  }
+  
   /** Creates a new Intake. */
   public Intake() {
     intakeRoller.getConfigurator().apply(IntakeConstants.intakeRollerConfig);
@@ -115,6 +137,8 @@ public class Intake extends SubsystemBase {
     );
   }
 
+
+
   public Command stowIntake() {
     return this.runOnce(() -> {
       this.setIntakePos(IntakeConstants.INTAKE_STOW_POS);
@@ -142,6 +166,8 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
+    speedPub.set(intakeRoller.getVelocity().getValueAsDouble());
+    atTargetPub.set(atTargetSpeed());
     // This method will be called once per scheduler run
   }
 }
