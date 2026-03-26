@@ -17,6 +17,8 @@ public class Hopper extends SubsystemBase {
   private final VelocityVoltage hopperRequest = new VelocityVoltage(0).withSlot(0).withEnableFOC(true);
   private final NeutralOut neutral = new NeutralOut();
 
+  private static final double RPS_TOLERANCE = 2.0;
+
   /** Creates a new Indexer. */
   public Hopper() {
     hopper.getConfigurator().apply(HopperConstants.hopperConfig);
@@ -24,6 +26,10 @@ public class Hopper extends SubsystemBase {
 
   public void setHopperVelocity(double vel) {
     hopper.setControl(hopperRequest.withVelocity(vel));
+  }
+
+  public double getHopperVelocity(){
+    return hopper.getVelocity().getValueAsDouble();
   }
 
   public void stopHopper() {
@@ -42,8 +48,25 @@ public class Hopper extends SubsystemBase {
     return this.runOnce(() -> this.setHopperVelocity(HopperConstants.HOPPER_UNSTUCK_VELOCITY));
   }
 
+  public boolean atTargetSpeed(double targetSpeed){
+    return Math.abs(getHopperVelocity() - targetSpeed) < RPS_TOLERANCE;
+  }
+
+  public boolean atIntakeSpeed(){
+    return atTargetSpeed(HopperConstants.HOPPER_INTAKE_VELOCITY);
+  }
+
+  public boolean atShootSpeed(){
+    return atTargetSpeed(HopperConstants.HOPPER_SHOOT_VELOCITY);
+  }
+
+  public boolean atUnstuckSpeed(){
+    return atTargetSpeed(HopperConstants.HOPPER_UNSTUCK_VELOCITY);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
   }
 }
