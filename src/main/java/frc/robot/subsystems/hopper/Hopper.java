@@ -34,12 +34,11 @@ public class Hopper extends SubsystemBase {
   /** Creates a new Indexer. */
   public Hopper() {
     hopper.getConfigurator().apply(HopperConstants.hopperConfig);
-
     NetworkTable table = NetworkTableInstance.getDefault().getTable("Hopper");
-      speedPublish    = table.getDoubleTopic("speed_rps").publish();
-      AtIntakePublish = table.getBooleanTopic("AtIntake").publish();
-      AtShootPublish = table.getBooleanTopic("atShoot").publish();
-      AtUnstuckPublish = table.getBooleanTopic("atUnstuck").publish();
+    speedPublish    = table.getDoubleTopic("speed_rps").publish();
+    AtIntakePublish = table.getBooleanTopic("AtIntake").publish();
+    AtShootPublish = table.getBooleanTopic("atShoot").publish();
+    AtUnstuckPublish = table.getBooleanTopic("atUnstuck").publish();
   }
 
   public void setHopperVelocity(double vel) {
