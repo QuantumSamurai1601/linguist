@@ -21,7 +21,7 @@ public class HopperConstants {
     hopperConfig.Feedback.SensorToMechanismRatio = 2;
   }
 
-public static final int HopperMotorID = 34;
+  public static final int HopperMotorID = 34;
 
   public static final double HOPPER_INTAKE_VELOCITY = 10;
   public static final double HOPPER_SHOOT_VELOCITY = 24;
