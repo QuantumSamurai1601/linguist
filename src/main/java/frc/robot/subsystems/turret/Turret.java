@@ -2,6 +2,10 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 //-90 to -103 if -180 to 180
+
+// we should improve our treemap for shooting
+// esentially our tree map just gets a distance then uses a map to transfer that to a velocity but if its inbetween points, it will use some linear interpolation!!!
+
 package frc.robot.subsystems.turret;
 
 import com.ctre.phoenix6.controls.Follower;
@@ -24,14 +28,26 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.AllianceFlipUtil;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
+import frc.robot.subsystems.turret.TurretConstants;
+
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 @Logged
 public class Turret extends SubsystemBase {
   public boolean enableTracking = true;
 
-  private final TalonFX turret = new TalonFX(22);
-  private final TalonFX hood = new TalonFX(21);
-  private final TalonFX shooterLeader = new TalonFX(29); // Left
-  private final TalonFX shooterFollower = new TalonFX(28); // Right
+  private final TalonFX turret = new TalonFX(TurretConstants.TurretMotorID);
+  private final TalonFX hood = new TalonFX(TurretConstants.HoodMotorID);
+  private final TalonFX shooterLeader = new TalonFX(TurretConstants.ShootLeadMotorID); // Left
+  private final TalonFX shooterFollower = new TalonFX(TurretConstants.ShootFollowMotorID); // Right
+
+  private final DoublePublisher ShooterLeaderRPSPublish;
+  private final DoublePublisher ShooterFollowerRPSPublish;
+  private final DoublePublisher HoodAnglePublish;
+  private final DoublePublisher TurretAnglePublish;
 
   private final MotionMagicVoltage turretRequest = new MotionMagicVoltage(0).withSlot(0).withEnableFOC(true);
   private final PositionVoltage hoodRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
@@ -44,6 +60,13 @@ public class Turret extends SubsystemBase {
   public Turret(CommandSwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;
 
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter");
+    ShooterLeaderRPSPublish = table.getDoubleTopic("Shooter Leader RPS").publish();
+    ShooterFollowerRPSPublish = table.getDoubleTopic("Shooter Follower RPS").publish();
+    TurretAnglePublish = table.getDoubleTopic("Turret Angle").publish();
+    HoodAnglePublish = table.getDoubleTopic("Hood Angle").publish();
+  
+
     turret.getConfigurator().apply(TurretConstants.turretConfig);
     hood.getConfigurator().apply(TurretConstants.hoodConfig);
     shooterLeader.getConfigurator().apply(TurretConstants.shooterLeaderConfig);
@@ -52,7 +75,7 @@ public class Turret extends SubsystemBase {
     turret.setPosition(0);
   }
 
-  public double convertToLegalTurretSetpointDeg(double targetAngleDeg) {
+  public double convertToLegalTurretSetpointDeg(double targetAngleDeg) { // it converts -30 to 330
     targetAngleDeg =
         MathUtil.inputModulus(
             targetAngleDeg + TurretConstants.TURRET_ZERO_OFFSET_DEG, 0.0, 360.0);
@@ -142,9 +165,11 @@ public class Turret extends SubsystemBase {
     setTurretPosDeg(getFieldTargetAngle(hub).getDegrees());
 
     double distanceMeters = getFieldTargetDistance(hub);
-    // double hoodRotations = TurretConstants.hoodTreeMap.get(distanceMeters);
+
     double shooterRps = TurretConstants.shooterTreeMap.get(distanceMeters);
-    // setHoodPosRot(hoodRotations);
+    double hoodRotations = TurretConstants.hoodTreeMap.get(distanceMeters);
+
+    setHoodPosRot(hoodRotations);
     setShooterVel(shooterRps);
   }
 
@@ -159,11 +184,11 @@ public class Turret extends SubsystemBase {
     setShooterVel(shooterRps);
   }
   
-  public void setTurretTargetingMode() {
+  public void setTurretTargetingMode() { //if we are closer to hub, aim at hub or else aim at ferry
     Pose2d robotPose = drivetrain.getState().Pose;
     double targetingSwitchX = AllianceFlipUtil.applyX(Units.inchesToMeters(175.0));
 
-    if (AllianceFlipUtil.shouldFlip()) {
+    if (AllianceFlipUtil.shouldFlip()) { //depends on what team we are on, it will flip the values
         if (robotPose.getX() > targetingSwitchX) {
             trackHub();
         } else {
@@ -178,7 +203,7 @@ public class Turret extends SubsystemBase {
     }
   }
 
-  public void toggleTracking() {
+  public void toggleTracking() { // when its true it goes of! when its off it goes true!
     if (enableTracking == true) {
       enableTracking = false;
       setTurretPosDeg(0);
@@ -188,10 +213,32 @@ public class Turret extends SubsystemBase {
       enableTracking = true;
     }
   }
+
+  public double getShooterFollowerRPS() {
+    return shooterFollower.getVelocity().getValueAsDouble();
+  }
+
+  public double getShooterLeaderRPS() {
+    return shooterLeader.getVelocity().getValueAsDouble();
+  }
+
+  public double getTurretAngle() {
+    return Units.rotationsToDegrees(turret.getPosition().getValueAsDouble());
+  }
+
+  public double getHoodAngle() {
+    return Units.rotationsToDegrees(hood.getPosition().getValueAsDouble());
+  }
   
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    ShooterLeaderRPSPublish.set(getShooterLeaderRPS());
+    ShooterFollowerRPSPublish.set(getShooterFollowerRPS());
+    TurretAnglePublish.set(getTurretAngle());
+    HoodAnglePublish.set(getHoodAngle());
+
     if (enableTracking) {
       setTurretTargetingMode();
     }

@@ -128,4 +128,8 @@ public class TurretConstants {
 
   public static final double TURRET_SHOOTING_RPS = 50;
 
+  public static final int TurretMotorID = 22;
+  public static final int HoodMotorID = 21;
+  public static final int ShootLeadMotorID = 29;
+  public static final int ShootFollowMotorID = 28;
 }
