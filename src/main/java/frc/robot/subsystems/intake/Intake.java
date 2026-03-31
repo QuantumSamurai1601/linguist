@@ -20,9 +20,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 public class Intake extends SubsystemBase {
   private final TalonFX intakeRoller = new TalonFX(44);
-  private final TalonFX intakeExtend = new TalonFX(45);
+  private final TalonFX intakeExtender = new TalonFX(45);
 
   private final VoltageOut intakeRollerRequest = new VoltageOut(0).withEnableFOC(true);
   private final PositionVoltage intakeExtendRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
@@ -33,15 +38,52 @@ public class Intake extends SubsystemBase {
   public boolean isIntakeWheelOn = false;
   public boolean isIntakeExtended = false;
   public boolean hasIntakeHomed = false;
-  
-  /** Creates a new Intake. */
+
+  public DoublePublisher speedPubExtender;
+  public BooleanPublisher atTargetPubExtender;
+
+  public DoublePublisher speedPubRoller;
+  public BooleanPublisher atTargetPubRoller;
+    
   public Intake() {
     intakeRoller.getConfigurator().apply(IntakeConstants.intakeRollerConfig);
-    intakeExtend.getConfigurator().apply(IntakeConstants.intakeExtendConfig);
+    intakeExtender.getConfigurator().apply(IntakeConstants.intakeExtendConfig);
 
-    intakeExtend.setPosition(0);
+    intakeExtender.setPosition(0);
+
+    NetworkTable extenderTable = NetworkTableInstance.getDefault().getTable("IntakeExtender");
+    speedPubExtender = extenderTable.getDoubleTopic("Speed").publish();
+    atTargetPubExtender = extenderTable.getBooleanTopic("AtTargetExtender").publish();
+
+    NetworkTable rollerTable = NetworkTableInstance.getDefault().getTable("IntakeRoller");
+
+    speedPubRoller = rollerTable.getDoubleTopic("Speed").publish();
+    atTargetPubRoller = rollerTable.getBooleanTopic("AtTargetRoller").publish();
+
   }
 
+  public double getIntakeExtendPosition() {
+    return intakeExtender.getPosition().getValueAsDouble();
+   
+  }
+
+  public double getIntakeRollerPosition() {
+    return intakeRoller.getPosition().getValueAsDouble();
+  }
+
+  public double getIntakeRollerVelocity() {
+    return intakeRoller.getVelocity().getValueAsDouble();
+  }
+
+  public boolean atTargetSpeedExtender() {
+    return Math.abs(intakeRoller.getVelocity().getValueAsDouble() - IntakeConstants.EXTENDER_VELOCITY_TOLERANCE_RPS) < IntakeConstants.EXTENDER_VELOCITY_TOLERANCE_RPS;
+  }
+
+  public boolean atTargetSpeedRoller() {
+    return Math.abs(intakeRoller.getVelocity().getValueAsDouble() - IntakeConstants.ROLLER_VELOCITY_TOLERANCE_RPS) < IntakeConstants.ROLLER_VELOCITY_TOLERANCE_RPS;
+  }
+
+  
   public void setIntakeVolts(double volts) {
     intakeRoller.setControl(intakeRollerRequest.withOutput(volts));
   }
@@ -62,30 +104,30 @@ public class Intake extends SubsystemBase {
   }
 
   private void setIntakePos(double pos) {
-    intakeExtend.setControl(intakeExtendRequest.withPosition(pos));
+    intakeExtender.setControl(intakeExtendRequest.withPosition(pos));
   }
 
   public Command homeIntakeExtend() {
     return new SequentialCommandGroup(
       new InstantCommand(() -> {
-        intakeExtend.getConfigurator().apply(IntakeConstants.homingConfig);
-        intakeExtend.setControl(new DutyCycleOut(IntakeConstants.INTAKE_HOMING_DUTY_CYCLE_OUT));
+        intakeExtender.getConfigurator().apply(IntakeConstants.homingConfig);
+        intakeExtender.setControl(new DutyCycleOut(IntakeConstants.INTAKE_HOMING_DUTY_CYCLE_OUT));
       }),
       new WaitUntilCommand(() ->
-        debouncer.calculate(intakeExtend.getStatorCurrent().getValueAsDouble() > IntakeConstants.INTAKE_HOMING_STATOR_CURRENT_THRES && Math.abs(intakeExtend.getVelocity().getValueAsDouble()) < IntakeConstants.INTAKE_HOMING_MAX_VELOCITY_THRES)
+        debouncer.calculate(intakeExtender.getStatorCurrent().getValueAsDouble() > IntakeConstants.INTAKE_HOMING_STATOR_CURRENT_THRES && Math.abs(intakeExtender.getVelocity().getValueAsDouble()) < IntakeConstants.INTAKE_HOMING_MAX_VELOCITY_THRES)
       ).withTimeout(2),
       new InstantCommand(() -> {
-        intakeExtend.setControl(neutral);
-        intakeExtend.setNeutralMode(NeutralModeValue.Brake);
+        intakeExtender.setControl(neutral);
+        intakeExtender.setNeutralMode(NeutralModeValue.Brake);
       }),
       new WaitCommand(0.5),
       new InstantCommand(() -> {
-        intakeExtend.setPosition(0);
+        intakeExtender.setPosition(0);
         hasIntakeHomed = true;
-        intakeExtend.setNeutralMode(NeutralModeValue.Coast);
-        intakeExtend.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(false));
-        intakeExtend.getConfigurator().apply(IntakeConstants.intakeExtendConfig);
-        intakeExtend.setControl(intakeExtendRequest.withPosition(IntakeConstants.INTAKE_STOW_POS));
+        intakeExtender.setNeutralMode(NeutralModeValue.Coast);
+        intakeExtender.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(false));
+        intakeExtender.getConfigurator().apply(IntakeConstants.intakeExtendConfig);
+        intakeExtender.setControl(intakeExtendRequest.withPosition(IntakeConstants.INTAKE_STOW_POS));
       })
     );
   }
@@ -99,7 +141,7 @@ public class Intake extends SubsystemBase {
       new InstantCommand(() -> {
         this.setIntakePos(IntakeConstants.INTAKE_EXTEND_POS);
         this.isIntakeExtended = true;
-        if (intakeExtend.getPosition().getValueAsDouble() < 0.1) {
+        if (intakeExtender.getPosition().getValueAsDouble() < 0.1) {
           this.setIntakeVolts(IntakeConstants.OUTAKING_VOLTS);
         }
       }),
@@ -114,6 +156,8 @@ public class Intake extends SubsystemBase {
       })
     );
   }
+
+
 
   public Command stowIntake() {
     return this.runOnce(() -> {
@@ -142,6 +186,11 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
+    speedPubRoller.set(intakeRoller.getVelocity().getValueAsDouble());
+    atTargetPubRoller.set(atTargetSpeedRoller());
+
+    speedPubExtender.set(intakeExtender.getVelocity().getValueAsDouble());
+    atTargetPubExtender.set(atTargetSpeedExtender());
     // This method will be called once per scheduler run
   }
 }

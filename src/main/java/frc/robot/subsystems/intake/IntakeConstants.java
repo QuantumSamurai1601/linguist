@@ -54,4 +54,7 @@ public class IntakeConstants {
   public static final double INTAKE_HOMING_DUTY_CYCLE_OUT = 0.25;
   public static final double INTAKE_HOMING_STATOR_CURRENT_THRES = 30;
   public static final double INTAKE_HOMING_MAX_VELOCITY_THRES = 0.72;
-}
+  public static final double EXTENDER_VELOCITY_TOLERANCE_RPS = 1; //placeholder value
+  public static final double ROLLER_VELOCITY_TOLERANCE_RPS = 1; //placeholder value
+
+  }
