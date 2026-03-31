@@ -24,6 +24,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.AllianceFlipUtil;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 @Logged
 public class Turret extends SubsystemBase {
   public boolean enableTracking = true;
@@ -32,6 +37,11 @@ public class Turret extends SubsystemBase {
   private final TalonFX hood = new TalonFX(21);
   private final TalonFX shooterLeader = new TalonFX(29); // Left
   private final TalonFX shooterFollower = new TalonFX(28); // Right
+
+  private final DoublePublisher ShooterLeaderRPSPublish;
+  private final DoublePublisher ShooterFollowerRPSPublish;
+  private final DoublePublisher HoodAnglePublish;
+  private final DoublePublisher TurretAnglePublish;
 
   private final MotionMagicVoltage turretRequest = new MotionMagicVoltage(0).withSlot(0).withEnableFOC(true);
   private final PositionVoltage hoodRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
@@ -49,6 +59,10 @@ public class Turret extends SubsystemBase {
     shooterLeader.getConfigurator().apply(TurretConstants.shooterLeaderConfig);
     shooterFollower.setControl(shooterFollowerRequest);
 
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter");
+        speedPub    = table.getDoubleTopic("speed_rps").publish();
+        setpointPub = table.getDoubleTopic("setpoint_rps").publish();
+        atTargetPub = table.getBooleanTopic("atTarget").publish();
     turret.setPosition(0);
   }
 
