@@ -12,6 +12,12 @@ import frc.robot.AllianceFlipUtil;
 import frc.robot.subsystems.vision.VisionConstants;
 
 public class TurretConstants {
+
+    public static final int TurretMotorID = 22;
+  public static final int HoodMotorID = 21;
+  public static final int ShootLeadMotorID = 29;
+  public static final int ShootFollowMotorID = 28;
+  
   public static final TalonFXConfiguration turretConfig = new TalonFXConfiguration();
   static {
     turretConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
