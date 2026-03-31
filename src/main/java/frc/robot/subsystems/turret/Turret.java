@@ -29,19 +29,16 @@ import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
+import frc.robot.subsystems.turret.TurretConstants;
+
 @Logged
 public class Turret extends SubsystemBase {
   public boolean enableTracking = true;
 
-  private final TalonFX turret = new TalonFX(22);
-  private final TalonFX hood = new TalonFX(21);
-  private final TalonFX shooterLeader = new TalonFX(29); // Left
-  private final TalonFX shooterFollower = new TalonFX(28); // Right
-
-  private final DoublePublisher ShooterLeaderRPSPublish;
-  private final DoublePublisher ShooterFollowerRPSPublish;
-  private final DoublePublisher HoodAnglePublish;
-  private final DoublePublisher TurretAnglePublish;
+  private final TalonFX turret = new TalonFX(TurretConstants.TurretMotorID);
+  private final TalonFX hood = new TalonFX(TurretConstants.HoodMotorID);
+  private final TalonFX shooterLeader = new TalonFX(TurretConstants.ShootLeadMotorID); // Left
+  private final TalonFX shooterFollower = new TalonFX(TurretConstants.ShootFollowMotorID); // Right
 
   private final MotionMagicVoltage turretRequest = new MotionMagicVoltage(0).withSlot(0).withEnableFOC(true);
   private final PositionVoltage hoodRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
@@ -49,6 +46,12 @@ public class Turret extends SubsystemBase {
   private final Follower shooterFollowerRequest = new Follower(29, MotorAlignmentValue.Opposed);
 
   private final CommandSwerveDrivetrain drivetrain;
+
+  private final DoublePublisher shooterLeaderRPSPublish;
+  //private final DoublePublisher shooterFollowerRPSPublish;
+  //private final DoublePublisher hoodAnglePublish;
+  //private final DoublePublisher turretAnglePublish;
+  private final BooleanPublisher shooterLeaderatTargetPub;
 
   /** Creates a new Turret. */
   public Turret(CommandSwerveDrivetrain drivetrain) {
@@ -58,12 +61,12 @@ public class Turret extends SubsystemBase {
     hood.getConfigurator().apply(TurretConstants.hoodConfig);
     shooterLeader.getConfigurator().apply(TurretConstants.shooterLeaderConfig);
     shooterFollower.setControl(shooterFollowerRequest);
-
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("Shooter");
-        speedPub    = table.getDoubleTopic("speed_rps").publish();
-        setpointPub = table.getDoubleTopic("setpoint_rps").publish();
-        atTargetPub = table.getBooleanTopic("atTarget").publish();
+    
     turret.setPosition(0);
+
+    NetworkTable tableShooterLeader = NetworkTableInstance.getDefault().getTable("ShooterLeader");
+    shooterLeaderRPSPublish  = tableShooterLeader.getDoubleTopic("speed_rps").publish();
+    shooterLeaderatTargetPub = tableShooterLeader.getBooleanTopic("atTarget").publish();
   }
 
   public double convertToLegalTurretSetpointDeg(double targetAngleDeg) {
