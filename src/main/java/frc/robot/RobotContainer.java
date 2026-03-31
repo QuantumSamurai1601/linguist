@@ -57,15 +57,6 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public final IntakeSubsystem intake = new IntakeSubsystem();
-    public final HopperSubsystem hopper = new HopperSubsystem();
-    public final TowerSubsystem tower = new TowerSubsystem();
-    public final ShooterSubsystem shooter = new ShooterSubsystem();
-
-    public final VisionSubsystem vision = new VisionSubsystem();
-
-    private ScoringMode scoringMode = ScoringMode.SHOOTING;
-
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
 
