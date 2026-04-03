@@ -328,13 +328,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs
     ) { 
-        var estimatedPose = samplePoseAt(timestampSeconds);
-        if (estimatedPose.isPresent()) {
-            double errorMeters = estimatedPose.get().getTranslation().getDistance(visionRobotPoseMeters.getTranslation());
-            if (errorMeters > 1.0) {
-                return;
-            }
-        }
+        // var estimatedPose = samplePoseAt(timestampSeconds);
+        // if (estimatedPose.isPresent()) {
+        //     double errorMeters = estimatedPose.get().getTranslation().getDistance(visionRobotPoseMeters.getTranslation());
+        //     if (errorMeters > 1.0) {
+        //         return;
+        //     }
+        // }
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
     }
 
