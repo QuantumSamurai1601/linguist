@@ -20,8 +20,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -154,18 +152,18 @@ public class RobotContainer {
         joystick.x().whileTrue(hopper.runHopperUnstuck());
         joystick.x().onFalse(hopper.runOnce(() -> hopper.stopHopper()));
 
-        joystick.back().onTrue(turret.runOnce(() -> turret.toggleTracking()));        
+        joystick.back().onTrue(turret.runOnce(() -> turret.toggleTracking()));
+
+        joystick.start().onTrue(intake.runOnce(() -> intake.slowIntakeCompress()));
 
         joystick.rightTrigger(0.5).onTrue(Commands.parallel(
             hopper.runHopperShoot(),
             tower.runTowerShoot()
-            // turret.turretShoot()
         ));
 
         joystick.rightTrigger(0.5).onFalse(Commands.parallel(
             hopper.runOnce(() -> hopper.stopHopper()),
             tower.runOnce(() -> tower.stopTower())
-            // turret.turretShoot()
         ));
 
         joystick.povUp().onTrue(turret.runOnce(() -> turret.hoodInchUp()));
