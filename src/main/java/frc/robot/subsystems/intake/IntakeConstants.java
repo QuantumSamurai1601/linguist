@@ -22,16 +22,20 @@ public class IntakeConstants {
     intakeExtendConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     intakeExtendConfig.CurrentLimits.SupplyCurrentLimit = 20;
+    intakeExtendConfig.CurrentLimits.StatorCurrentLimit = 60;
     intakeExtendConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    intakeExtendConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     intakeExtendConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0;
-    intakeExtendConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
+    intakeExtendConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -0.01;
     intakeExtendConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = false; // Change after tuning
     intakeExtendConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false; // Change after turning
 
-    intakeExtendConfig.Slot0.kS = 0.43;
-    intakeExtendConfig.Slot0.kP = 300;
+    intakeExtendConfig.Slot0.kS = 0.44;
+    intakeExtendConfig.Slot0.kP = 350;
     intakeExtendConfig.Slot0.kD = 0;
+    intakeExtendConfig.MotionMagic.MotionMagicCruiseVelocity = 0.17;
+    intakeExtendConfig.MotionMagic.MotionMagicAcceleration = 1;
 
     intakeExtendConfig.Feedback.SensorToMechanismRatio = 66;
   }
@@ -45,11 +49,12 @@ public class IntakeConstants {
     homingConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
   }
 
-  public static final double INTAKING_VOLTS = 7.6;
-  public static final double OUTAKING_VOLTS = -7.6;
-  public static final double INTAKE_EXTEND_ASSIST_TIME_SEC = 0.5;
-  public static final double INTAKE_STOW_POS = 0.32;
-  public static final double INTAKE_EXTEND_POS = 0.73;
+  public static final double INTAKING_VOLTS = 5.67;
+  public static final double OUTAKING_VOLTS = -5.67;
+  public static final double INTAKE_EXTEND_ASSIST_TIME_SEC = 0.1;
+  public static final double INTAKE_STOW_POS = 0.23;
+  public static final double INTAKE_EXTEND_POS = 0.649;
+  public static final double INTAKE_COMPRESS_POS = 0.01;
 
   public static final double INTAKE_HOMING_DUTY_CYCLE_OUT = 0.25;
   public static final double INTAKE_HOMING_STATOR_CURRENT_THRES = 30;

@@ -6,6 +6,7 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -26,6 +27,7 @@ public class Intake extends SubsystemBase {
 
   private final VoltageOut intakeRollerRequest = new VoltageOut(0).withEnableFOC(true);
   private final PositionVoltage intakeExtendRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
+  private final MotionMagicVoltage intakeCompressRequest = new MotionMagicVoltage(0).withSlot(0).withEnableFOC(true);
   private final NeutralOut neutral = new NeutralOut();
 
   private final Debouncer debouncer = new Debouncer(0.1);
@@ -56,6 +58,11 @@ public class Intake extends SubsystemBase {
     }
   }
 
+  public void slowIntakeCompress() {
+    intakeExtend.setControl(intakeCompressRequest.withPosition(IntakeConstants.INTAKE_COMPRESS_POS));
+    isIntakeExtended = false;
+  }
+
   public void setIntakeNeutral() {
     isIntakeWheelOn = false;
     intakeRoller.setControl(neutral);
@@ -63,31 +70,6 @@ public class Intake extends SubsystemBase {
 
   private void setIntakePos(double pos) {
     intakeExtend.setControl(intakeExtendRequest.withPosition(pos));
-  }
-
-  public Command homeIntakeExtend() {
-    return new SequentialCommandGroup(
-      new InstantCommand(() -> {
-        intakeExtend.getConfigurator().apply(IntakeConstants.homingConfig);
-        intakeExtend.setControl(new DutyCycleOut(IntakeConstants.INTAKE_HOMING_DUTY_CYCLE_OUT));
-      }),
-      new WaitUntilCommand(() ->
-        debouncer.calculate(intakeExtend.getStatorCurrent().getValueAsDouble() > IntakeConstants.INTAKE_HOMING_STATOR_CURRENT_THRES && Math.abs(intakeExtend.getVelocity().getValueAsDouble()) < IntakeConstants.INTAKE_HOMING_MAX_VELOCITY_THRES)
-      ).withTimeout(2),
-      new InstantCommand(() -> {
-        intakeExtend.setControl(neutral);
-        intakeExtend.setNeutralMode(NeutralModeValue.Brake);
-      }),
-      new WaitCommand(0.5),
-      new InstantCommand(() -> {
-        intakeExtend.setPosition(0);
-        hasIntakeHomed = true;
-        intakeExtend.setNeutralMode(NeutralModeValue.Coast);
-        intakeExtend.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(false));
-        intakeExtend.getConfigurator().apply(IntakeConstants.intakeExtendConfig);
-        intakeExtend.setControl(intakeExtendRequest.withPosition(IntakeConstants.INTAKE_STOW_POS));
-      })
-    );
   }
   
   public boolean getHasIntakeHomed() {
