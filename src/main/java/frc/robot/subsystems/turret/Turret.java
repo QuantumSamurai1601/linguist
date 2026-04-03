@@ -18,6 +18,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -39,6 +40,13 @@ public class Turret extends SubsystemBase {
   private final Follower shooterFollowerRequest = new Follower(29, MotorAlignmentValue.Opposed);
 
   private final CommandSwerveDrivetrain drivetrain;
+  private final Debouncer shotReadyDebouncer =
+      new Debouncer(TurretConstants.SHOT_READY_DEBOUNCE_SECONDS);
+
+  private double turretTargetRot = 0.0;
+  private double hoodTargetRot = 0.0;
+  private double shooterTargetRps = 0.0;
+  private boolean hoodTargetActive = false;
 
   /** Creates a new Turret. */
   public Turret(CommandSwerveDrivetrain drivetrain) {
@@ -79,11 +87,61 @@ public class Turret extends SubsystemBase {
     return finalOffsetAngleRot;
   }
 
+  private Translation2d getTurretPivot(Pose2d robotPose) {
+    return robotPose.getTranslation()
+        .plus(TurretConstants.ROBOT_TO_TURRET_METERS.rotateBy(robotPose.getRotation()));
+  }
+
+  private Translation2d getTurretPivotFieldVelocity(Pose2d robotPose) {
+    ChassisSpeeds robotRelativeSpeeds = drivetrain.getState().Speeds;
+    ChassisSpeeds fieldRelativeSpeeds =
+        ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, robotPose.getRotation());
+
+    Translation2d robotCenterFieldVelocity =
+        new Translation2d(
+            fieldRelativeSpeeds.vxMetersPerSecond, fieldRelativeSpeeds.vyMetersPerSecond);
+
+    Translation2d turretOffset = TurretConstants.ROBOT_TO_TURRET_METERS;
+    // Rotating the robot gives the turret pivot extra sideways velocity because it is offset
+    // from the center of rotation.
+    Translation2d pivotSpinRobotRelativeVelocity =
+        new Translation2d(
+            -robotRelativeSpeeds.omegaRadiansPerSecond * turretOffset.getY(),
+            robotRelativeSpeeds.omegaRadiansPerSecond * turretOffset.getX());
+
+    Translation2d pivotSpinFieldVelocity =
+        pivotSpinRobotRelativeVelocity.rotateBy(robotPose.getRotation());
+
+    return robotCenterFieldVelocity.plus(pivotSpinFieldVelocity);
+  }
+
+  private Translation2d getCompensatedFieldTarget(Translation2d target) {
+    Pose2d robotPose = drivetrain.getState().Pose;
+    Translation2d turretPivot = getTurretPivot(robotPose);
+    Translation2d turretPivotVelocity = getTurretPivotFieldVelocity(robotPose);
+
+    // Start with the real field target and the turret pivot's current position.
+    // This gives us the current shot distance before applying any motion compensation.
+    double initialDistanceMeters = target.minus(turretPivot).getNorm();
+
+    // Estimate how long the fuel will be in the air at this distance.
+    double flightTimeSeconds = TurretConstants.flightTimeTreeMap.get(initialDistanceMeters);
+
+    // While the fuel is flying, the turret pivot keeps moving with the robot.
+    // Aim at a virtual point offset opposite that motion so the moving shot lands on the real target.
+    Translation2d compensatedTarget = target.minus(turretPivotVelocity.times(flightTimeSeconds));
+
+    // Recompute once using the led target because the shot distance changes slightly after compensation.
+    double refinedDistanceMeters = compensatedTarget.minus(turretPivot).getNorm();
+    double refinedFlightTimeSeconds = TurretConstants.flightTimeTreeMap.get(refinedDistanceMeters);
+
+    // Use the refined flight time for the final compensated target.
+    return target.minus(turretPivotVelocity.times(refinedFlightTimeSeconds));
+  }
+
   public double getFieldTargetDistance(Translation2d target) {
     Pose2d robotPose = drivetrain.getState().Pose;
-    Translation2d turretPivot =
-        robotPose.getTranslation()
-            .plus(TurretConstants.ROBOT_TO_TURRET_METERS.rotateBy(robotPose.getRotation()));
+    Translation2d turretPivot = getTurretPivot(robotPose);
 
     Translation2d turretToTarget = target.minus(turretPivot);
     return turretToTarget.getNorm();
@@ -91,10 +149,7 @@ public class Turret extends SubsystemBase {
 
   public Rotation2d getFieldTargetAngle(Translation2d target) {
     Pose2d robotPose = drivetrain.getState().Pose;
-    Translation2d turretPivot =
-      robotPose
-        .getTranslation()
-        .plus(TurretConstants.ROBOT_TO_TURRET_METERS.rotateBy(robotPose.getRotation()));
+    Translation2d turretPivot = getTurretPivot(robotPose);
     Translation2d turretToTarget = target.minus(turretPivot);
 
     if (turretToTarget.getNorm() < 1.0e-6) {
@@ -105,7 +160,8 @@ public class Turret extends SubsystemBase {
   }
 
   public void setTurretPosDeg(double deg) {
-    turret.setControl(turretRequest.withPosition(convertToLegalTurretSetpointDeg(deg)));
+    turretTargetRot = convertToLegalTurretSetpointDeg(deg);
+    turret.setControl(turretRequest.withPosition(turretTargetRot));
   }
 
   public void setHoodPosRot(double rot) {
@@ -116,11 +172,15 @@ public class Turret extends SubsystemBase {
     double redHoodProtMax = Units.inchesToMeters(493);
 
     if ((robotX > blueHoodProtMin && robotX < blueHoodProtMax) || robotX > redHoodProtMin && robotX < redHoodProtMax) {
-      hood.setControl(hoodRequest.withPosition(0));
+      hoodTargetRot = 0;
+      hoodTargetActive = true;
+      hood.setControl(hoodRequest.withPosition(hoodTargetRot));
       return;
     }
 
-    hood.setControl(hoodRequest.withPosition(rot));
+    hoodTargetRot = rot;
+    hoodTargetActive = true;
+    hood.setControl(hoodRequest.withPosition(hoodTargetRot));
   }
 
   public void hoodInchUp() {
@@ -134,23 +194,45 @@ public class Turret extends SubsystemBase {
   }
 
   public void setShooterVel(double vel) {
-    shooterLeader.setControl(shooterLeaderRequest.withVelocity(vel));
+    shooterTargetRps = vel;
+    shooterLeader.setControl(shooterLeaderRequest.withVelocity(shooterTargetRps));
+  }
+
+  public boolean isReadyToShoot() {
+    boolean turretReady =
+        Math.abs(turret.getPosition().getValueAsDouble() - turretTargetRot)
+            <= Units.degreesToRotations(TurretConstants.TURRET_READY_TOLERANCE_DEG);
+    boolean hoodReady =
+        !hoodTargetActive
+            || Math.abs(hood.getPosition().getValueAsDouble() - hoodTargetRot)
+                <= TurretConstants.HOOD_READY_TOLERANCE_ROT;
+    boolean shooterReady =
+        Math.abs(shooterLeader.getVelocity().getValueAsDouble() - shooterTargetRps)
+            <= TurretConstants.SHOOTER_READY_TOLERANCE_RPS;
+    boolean robotStable =
+        Math.abs(drivetrain.getState().Speeds.omegaRadiansPerSecond)
+            <= TurretConstants.MAX_SHOT_READY_OMEGA_RAD_PER_SEC;
+
+    return enableTracking
+        && shotReadyDebouncer.calculate(turretReady && hoodReady && shooterReady && robotStable);
   }
 
   public void trackHub() {
     Translation2d hub = TurretConstants.getHubCenterMeters().toTranslation2d();
-    setTurretPosDeg(getFieldTargetAngle(hub).getDegrees());
+    Translation2d compensatedHub = getCompensatedFieldTarget(hub);
+    setTurretPosDeg(getFieldTargetAngle(compensatedHub).getDegrees());
 
     double distanceMeters = getFieldTargetDistance(hub);
-    // double hoodRotations = TurretConstants.hoodTreeMap.get(distanceMeters);
+    double hoodRotations = TurretConstants.hoodTreeMap.get(distanceMeters);
     double shooterRps = TurretConstants.shooterTreeMap.get(distanceMeters);
-    // setHoodPosRot(hoodRotations);
+    setHoodPosRot(hoodRotations);
     setShooterVel(shooterRps);
   }
 
   public void trackFerry() {
     Translation2d ferry = TurretConstants.getClosestFerryPoint(drivetrain.getState().Pose.getTranslation());
-    setTurretPosDeg(getFieldTargetAngle(ferry).getDegrees());
+    Translation2d compensatedFerry = getCompensatedFieldTarget(ferry);
+    setTurretPosDeg(getFieldTargetAngle(compensatedFerry).getDegrees());
 
     double distanceMeters = getFieldTargetDistance(ferry);
     // double hoodRotations = TurretConstants.hoodTreeMap.get(distanceMeters);

@@ -72,11 +72,20 @@ public class TurretConstants {
 
   public static final InterpolatingDoubleTreeMap shooterTreeMap = new InterpolatingDoubleTreeMap();
   static {
-    shooterTreeMap.put(1.77, 28.0);
-    shooterTreeMap.put(2.82, 34.0);
-    shooterTreeMap.put(3.79, 39.0);
+    shooterTreeMap.put(1.75, 28.0);
+    shooterTreeMap.put(2.75, 34.0);
+    shooterTreeMap.put(3.75, 39.0);
     shooterTreeMap.put(4.75, 44.0);
     shooterTreeMap.put(5.75, 60.0);
+  }
+
+  public static final InterpolatingDoubleTreeMap flightTimeTreeMap = new InterpolatingDoubleTreeMap();
+  static {
+    flightTimeTreeMap.put(1.75, 0.18);
+    flightTimeTreeMap.put(2.75, 0.22);
+    flightTimeTreeMap.put(3.75, 0.27);
+    flightTimeTreeMap.put(4.75, 0.33);
+    flightTimeTreeMap.put(5.75, 0.40);
   }
 
   public static final InterpolatingDoubleTreeMap hoodTreeMap = new InterpolatingDoubleTreeMap();
@@ -100,6 +109,11 @@ public class TurretConstants {
 
   public static final double TURRET_ZERO_OFFSET_DEG = 90.0;
   public static final Translation2d ROBOT_TO_TURRET_METERS = new Translation2d(Units.inchesToMeters(5.21), 0);
+  public static final double TURRET_READY_TOLERANCE_DEG = 1.5;
+  public static final double HOOD_READY_TOLERANCE_ROT = 0.003;
+  public static final double SHOOTER_READY_TOLERANCE_RPS = 2.0;
+  public static final double SHOT_READY_DEBOUNCE_SECONDS = 0.15;
+  public static final double MAX_SHOT_READY_OMEGA_RAD_PER_SEC = 2.0;
 
   public static Translation3d getHubCenterMeters() {
     return AllianceFlipUtil.apply(new Translation3d(
