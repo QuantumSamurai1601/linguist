@@ -1,5 +1,10 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -28,8 +33,8 @@ public class TurretConstants {
     turretConfig.Slot0.kS = 0.28;
     turretConfig.Slot0.kP = 50;
     turretConfig.Slot0.kD = 0;
-    turretConfig.MotionMagic.MotionMagicCruiseVelocity = 5;
-    turretConfig.MotionMagic.MotionMagicAcceleration = 4.5;
+    turretConfig.MotionMagic.MotionMagicCruiseVelocity = 10.5;
+    turretConfig.MotionMagic.MotionMagicAcceleration = 8;
 
     turretConfig.Feedback.SensorToMechanismRatio = 35;
   }
@@ -73,52 +78,46 @@ public class TurretConstants {
   public static final InterpolatingDoubleTreeMap shooterTreeMap = new InterpolatingDoubleTreeMap();
   static {
     shooterTreeMap.put(1.75, 28.0);
-    shooterTreeMap.put(2.75, 34.0);
-    shooterTreeMap.put(3.75, 39.0);
-    shooterTreeMap.put(4.75, 44.0);
-    shooterTreeMap.put(5.75, 60.0);
+    shooterTreeMap.put(2.75, 32.0);
+    shooterTreeMap.put(3.75, 34.0);
+    shooterTreeMap.put(4.75, 37.0);
+    shooterTreeMap.put(5.75, 40.0);
+
+    shooterTreeMap.put(6.75, 42.0);
+    shooterTreeMap.put(7.75, 46.0);
+    shooterTreeMap.put(8.75, 50.0);
+    shooterTreeMap.put(9.75, 54.0);
+    shooterTreeMap.put(10.75, 60.0);
   }
 
   public static final InterpolatingDoubleTreeMap flightTimeTreeMap = new InterpolatingDoubleTreeMap();
   static {
-    flightTimeTreeMap.put(1.75, 0.18);
-    flightTimeTreeMap.put(2.75, 0.22);
-    flightTimeTreeMap.put(3.75, 0.27);
-    flightTimeTreeMap.put(4.75, 0.33);
-    flightTimeTreeMap.put(5.75, 0.40);
+    flightTimeTreeMap.put(1.75, 1.0);
+    flightTimeTreeMap.put(2.75, 1.1);
+    flightTimeTreeMap.put(3.75, 1.2);
+    flightTimeTreeMap.put(4.75, 1.4);
+    flightTimeTreeMap.put(5.75, 1.6);
   }
 
   public static final InterpolatingDoubleTreeMap hoodTreeMap = new InterpolatingDoubleTreeMap();
   static {
-    hoodTreeMap.put(1.77, 0.0);
-    hoodTreeMap.put(2.82, 0.0);
-    hoodTreeMap.put(3.79, 0.0);
+    hoodTreeMap.put(1.75, 0.005);
+    hoodTreeMap.put(2.75, 0.038);
+    hoodTreeMap.put(3.75, 0.058);
+    hoodTreeMap.put(4.75, 0.060);
   }
-
-  public static final TalonFXConfiguration homingConfig = new TalonFXConfiguration();
-  static {
-    homingConfig.CurrentLimits.StatorCurrentLimit = 30;
-    homingConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    homingConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
-    homingConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
-  }
-
-  public static final double TURRET_HOMING_DUTY_CYCLE_OUT = 0.1;
-  public static final double TURRET_HOMING_STATOR_CURRENT_THRES = 10;
-  public static final double TURRET_HOMING_MAX_VELOCITY_THRES = 1;
 
   public static final double TURRET_ZERO_OFFSET_DEG = 90.0;
   public static final Translation2d ROBOT_TO_TURRET_METERS = new Translation2d(Units.inchesToMeters(5.21), 0);
-  public static final double TURRET_READY_TOLERANCE_DEG = 1.5;
+  public static final double TURRET_READY_TOLERANCE_ROT = Degrees.of(3.5).in(Rotations);
   public static final double HOOD_READY_TOLERANCE_ROT = 0.003;
-  public static final double SHOOTER_READY_TOLERANCE_RPS = 2.0;
-  public static final double SHOT_READY_DEBOUNCE_SECONDS = 0.15;
-  public static final double MAX_SHOT_READY_OMEGA_RAD_PER_SEC = 2.0;
+  public static final double SHOOTER_READY_TOLERANCE_RPS = 5.0;
+  public static final double MAX_SHOT_READY_OMEGA_RAD_PER_SEC = RotationsPerSecond.of(0.5).in(RadiansPerSecond);
 
   public static Translation3d getHubCenterMeters() {
     return AllianceFlipUtil.apply(new Translation3d(
       VisionConstants.aprilTagLayout.getTagPose(26).get().getX() + Units.inchesToMeters(47.0) / 2.0,
-      VisionConstants.aprilTagLayout.getFieldWidth() / 2.0,
+      VisionConstants.FIELD_WIDTH / 2.0,
       Units.inchesToMeters(72)));
   }
 
@@ -126,12 +125,12 @@ public class TurretConstants {
     // Also technically upper red point
     Translation2d lowerBluePoint = AllianceFlipUtil.apply(new Translation2d(
       Units.inchesToMeters(45),
-      VisionConstants.aprilTagLayout.getFieldWidth() / 4.0
+      VisionConstants.FIELD_WIDTH / 4.0
     ));
     // Also technically lower red point
     Translation2d higherBluePoint = AllianceFlipUtil.apply(new Translation2d(
       Units.inchesToMeters(45),
-      (VisionConstants.aprilTagLayout.getFieldWidth() / 4.0) * 3.0
+      (VisionConstants.FIELD_WIDTH / 4.0) * 3.0
     ));
 
     Translation2d closerPoint =
@@ -139,7 +138,4 @@ public class TurretConstants {
 
     return closerPoint;
   }
-
-  public static final double TURRET_SHOOTING_RPS = 50;
-
 }
