@@ -6,11 +6,11 @@ package frc.robot.subsystems.turret;
 
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
@@ -20,14 +20,33 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.AllianceFlipUtil;
+import frc.robot.HubShiftUtil;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 @Logged
 public class Turret extends SubsystemBase {
+  private enum TrackingState {
+    HUB,
+    FERRY,
+    NONE
+  }
+  private NetworkTable turretTable = NetworkTableInstance.getDefault().getTable("Turret");
+  private BooleanPublisher isTrackingPub = turretTable.getBooleanTopic("Tracking Enabled").publish();
+  private StringPublisher trackedTargetPub = turretTable.getStringTopic("Tracked Target").publish();
+  private StringPublisher distanceToTrackedPub = turretTable.getStringTopic("Tracked Target Dist.").publish();
+  private StringPublisher hoodPosRotPub = turretTable.getStringTopic("Hood Position").publish();
+  private StringPublisher shooterVelRpsPub = turretTable.getStringTopic("Shooter Speed").publish();
+
   public boolean enableTracking = true;
+  public TrackingState trackingTarget = TrackingState.NONE;
+  public double distanceToTrackedTarget = 0.0;
 
   private final TalonFX turret = new TalonFX(22);
   private final TalonFX hood = new TalonFX(21);
@@ -39,18 +58,20 @@ public class Turret extends SubsystemBase {
   private final VelocityVoltage shooterLeaderRequest = new VelocityVoltage(0).withSlot(0).withEnableFOC(true);
   private final Follower shooterFollowerRequest = new Follower(29, MotorAlignmentValue.Opposed);
 
+  private final Debouncer canShootDebounce = new Debouncer(0.2);
   private final CommandSwerveDrivetrain drivetrain;
-  private final Debouncer shotReadyDebouncer =
-      new Debouncer(TurretConstants.SHOT_READY_DEBOUNCE_SECONDS);
+  private SwerveDriveState driveState;
 
   private double turretTargetRot = 0.0;
   private double hoodTargetRot = 0.0;
   private double shooterTargetRps = 0.0;
-  private boolean hoodTargetActive = false;
+
+  private double hoodDesiredRot = 0.0;
 
   /** Creates a new Turret. */
   public Turret(CommandSwerveDrivetrain drivetrain) {
     this.drivetrain = drivetrain;
+    driveState = drivetrain.getState();
 
     turret.getConfigurator().apply(TurretConstants.turretConfig);
     hood.getConfigurator().apply(TurretConstants.hoodConfig);
@@ -68,7 +89,7 @@ public class Turret extends SubsystemBase {
     double finalOffsetAngleRot = Units.degreesToRotations(targetAngleDeg);
     var softLimits = TurretConstants.turretConfig.SoftwareLimitSwitch;
 
-    if (softLimits.ForwardSoftLimitEnable && softLimits.ReverseSoftLimitEnable) {
+    if (turret.getFault_ForwardSoftLimit().getValue() || turret.getFault_ReverseSoftLimit().getValue()) {
       double turretForwardLimitRot = softLimits.ForwardSoftLimitThreshold;
       double turretReverseLimitRot = softLimits.ReverseSoftLimitThreshold;
 
@@ -93,9 +114,8 @@ public class Turret extends SubsystemBase {
   }
 
   private Translation2d getTurretPivotFieldVelocity(Pose2d robotPose) {
-    ChassisSpeeds robotRelativeSpeeds = drivetrain.getState().Speeds;
-    ChassisSpeeds fieldRelativeSpeeds =
-        ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, robotPose.getRotation());
+    ChassisSpeeds robotRelativeSpeeds = driveState.Speeds;
+    ChassisSpeeds fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, robotPose.getRotation());
 
     Translation2d robotCenterFieldVelocity =
         new Translation2d(
@@ -116,7 +136,7 @@ public class Turret extends SubsystemBase {
   }
 
   private Translation2d getCompensatedFieldTarget(Translation2d target) {
-    Pose2d robotPose = drivetrain.getState().Pose;
+    Pose2d robotPose = driveState.Pose;
     Translation2d turretPivot = getTurretPivot(robotPose);
     Translation2d turretPivotVelocity = getTurretPivotFieldVelocity(robotPose);
 
@@ -140,7 +160,7 @@ public class Turret extends SubsystemBase {
   }
 
   public double getFieldTargetDistance(Translation2d target) {
-    Pose2d robotPose = drivetrain.getState().Pose;
+    Pose2d robotPose = driveState.Pose;
     Translation2d turretPivot = getTurretPivot(robotPose);
 
     Translation2d turretToTarget = target.minus(turretPivot);
@@ -148,7 +168,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Rotation2d getFieldTargetAngle(Translation2d target) {
-    Pose2d robotPose = drivetrain.getState().Pose;
+    Pose2d robotPose = driveState.Pose;
     Translation2d turretPivot = getTurretPivot(robotPose);
     Translation2d turretToTarget = target.minus(turretPivot);
 
@@ -164,33 +184,58 @@ public class Turret extends SubsystemBase {
     turret.setControl(turretRequest.withPosition(turretTargetRot));
   }
 
-  public void setHoodPosRot(double rot) {
-    double robotX = drivetrain.getState().Pose.getX();
-    double blueHoodProtMin = Units.inchesToMeters(158.5);
-    double blueHoodProtMax = Units.inchesToMeters(206.5);
-    double redHoodProtMin = Units.inchesToMeters(445.5);
-    double redHoodProtMax = Units.inchesToMeters(493);
+  public void setHoodPosRot() {
+    Pose2d pose = driveState.Pose;
+    double robotX = pose.getX();
+    double robotY = pose.getY();
+    double blueHoodProtMin = Units.inchesToMeters(157.11); // Blue trench X line at 182.11 +/- 25
+    double blueHoodProtMax = Units.inchesToMeters(207.11);
+    double redHoodProtMin = Units.inchesToMeters(444.11); // Red trench X line at 469.11 +/- 25
+    double redHoodProtMax = Units.inchesToMeters(494.11);
+    double lowerHoodYProt = Units.inchesToMeters(50.67);
+    double upperHoodYProt = Units.inchesToMeters(267.02);
 
-    if ((robotX > blueHoodProtMin && robotX < blueHoodProtMax) || robotX > redHoodProtMin && robotX < redHoodProtMax) {
+    if ((robotX > blueHoodProtMin && robotX < blueHoodProtMax && (robotY < lowerHoodYProt || robotY > upperHoodYProt))   // Blue alliance trenches and in Y
+        || robotX > redHoodProtMin && robotX < redHoodProtMax && (robotY < lowerHoodYProt || robotY > upperHoodYProt)) { // Red alliance trenches and in Y
       hoodTargetRot = 0;
-      hoodTargetActive = true;
+      hood.setControl(hoodRequest.withPosition(hoodTargetRot));
+      return;
+    }
+
+    hoodTargetRot = hoodDesiredRot;
+    hood.setControl(hoodRequest.withPosition(hoodTargetRot));
+  }
+
+  public void setHoodPosRot(double rot) {
+    Pose2d pose = driveState.Pose;
+    double robotX = pose.getX();
+    double robotY = pose.getY();
+    double blueHoodProtMin = Units.inchesToMeters(155.11); // Blue trench X line at 182.11 +/- 27
+    double blueHoodProtMax = Units.inchesToMeters(209.11);
+    double redHoodProtMin = Units.inchesToMeters(442.11); // Red trench X line at 469.11 +/- 27
+    double redHoodProtMax = Units.inchesToMeters(496.11);
+    double lowerHoodYProt = Units.inchesToMeters(50.67);
+    double upperHoodYProt = Units.inchesToMeters(267.02);
+
+    if ((robotX > blueHoodProtMin && robotX < blueHoodProtMax && (robotY < lowerHoodYProt || robotY > upperHoodYProt))   // Blue alliance trenches and in Y
+        || robotX > redHoodProtMin && robotX < redHoodProtMax && (robotY < lowerHoodYProt || robotY > upperHoodYProt)) { // Red alliance trenches and in Y
+      hoodTargetRot = 0;
       hood.setControl(hoodRequest.withPosition(hoodTargetRot));
       return;
     }
 
     hoodTargetRot = rot;
-    hoodTargetActive = true;
     hood.setControl(hoodRequest.withPosition(hoodTargetRot));
   }
 
   public void hoodInchUp() {
     var current = hood.getPosition().getValueAsDouble();
-    setHoodPosRot(current + 0.01);
+    setHoodPosRot(current + 0.005);
   }
 
   public void hoodInchDown() {
     var current = hood.getPosition().getValueAsDouble();
-    setHoodPosRot(current - 0.01);
+    setHoodPosRot(current - 0.005);
   }
 
   public void setShooterVel(double vel) {
@@ -198,23 +243,14 @@ public class Turret extends SubsystemBase {
     shooterLeader.setControl(shooterLeaderRequest.withVelocity(shooterTargetRps));
   }
 
-  public boolean isReadyToShoot() {
-    boolean turretReady =
-        Math.abs(turret.getPosition().getValueAsDouble() - turretTargetRot)
-            <= Units.degreesToRotations(TurretConstants.TURRET_READY_TOLERANCE_DEG);
-    boolean hoodReady =
-        !hoodTargetActive
-            || Math.abs(hood.getPosition().getValueAsDouble() - hoodTargetRot)
-                <= TurretConstants.HOOD_READY_TOLERANCE_ROT;
-    boolean shooterReady =
-        Math.abs(shooterLeader.getVelocity().getValueAsDouble() - shooterTargetRps)
-            <= TurretConstants.SHOOTER_READY_TOLERANCE_RPS;
-    boolean robotStable =
-        Math.abs(drivetrain.getState().Speeds.omegaRadiansPerSecond)
-            <= TurretConstants.MAX_SHOT_READY_OMEGA_RAD_PER_SEC;
+  public void shooterNudgeUp() {
+    var current = shooterLeader.getClosedLoopReference().getValueAsDouble();
+    shooterLeader.setControl(shooterLeaderRequest.withVelocity(current + 2));
+  }
 
-    return enableTracking
-        && shotReadyDebouncer.calculate(turretReady && hoodReady && shooterReady && robotStable);
+  public void shooterNudgeDown() {
+    var current = shooterLeader.getClosedLoopReference().getValueAsDouble();
+    shooterLeader.setControl(shooterLeaderRequest.withVelocity(current - 2));
   }
 
   public void trackHub() {
@@ -222,40 +258,46 @@ public class Turret extends SubsystemBase {
     Translation2d compensatedHub = getCompensatedFieldTarget(hub);
     setTurretPosDeg(getFieldTargetAngle(compensatedHub).getDegrees());
 
-    double distanceMeters = getFieldTargetDistance(hub);
-    double hoodRotations = TurretConstants.hoodTreeMap.get(distanceMeters);
-    double shooterRps = TurretConstants.shooterTreeMap.get(distanceMeters);
-    setHoodPosRot(hoodRotations);
+    distanceToTrackedTarget = getFieldTargetDistance(compensatedHub);
+
+    double shooterRps = TurretConstants.shooterTreeMap.get(distanceToTrackedTarget);  
     setShooterVel(shooterRps);
+
+    hoodDesiredRot = TurretConstants.hoodTreeMap.get(distanceToTrackedTarget);
   }
 
   public void trackFerry() {
-    Translation2d ferry = TurretConstants.getClosestFerryPoint(drivetrain.getState().Pose.getTranslation());
+    Translation2d ferry = TurretConstants.getClosestFerryPoint(driveState.Pose.getTranslation());
     Translation2d compensatedFerry = getCompensatedFieldTarget(ferry);
     setTurretPosDeg(getFieldTargetAngle(compensatedFerry).getDegrees());
 
-    double distanceMeters = getFieldTargetDistance(ferry);
-    // double hoodRotations = TurretConstants.hoodTreeMap.get(distanceMeters);
-    double shooterRps = TurretConstants.shooterTreeMap.get(distanceMeters);
-    setHoodPosRot(0.079);
+    distanceToTrackedTarget = getFieldTargetDistance(compensatedFerry);
+    
+    double shooterRps = TurretConstants.shooterTreeMap.get(distanceToTrackedTarget);
     setShooterVel(shooterRps);
+
+    hoodDesiredRot = 0.079;
   }
   
   public void setTurretTargetingMode() {
-    Pose2d robotPose = drivetrain.getState().Pose;
-    double targetingSwitchX = AllianceFlipUtil.applyX(Units.inchesToMeters(175.0));
+    Pose2d robotPose = driveState.Pose;
+    double targetingSwitchX = AllianceFlipUtil.applyX(Units.inchesToMeters(180.0));
 
     if (AllianceFlipUtil.shouldFlip()) {
         if (robotPose.getX() > targetingSwitchX) {
             trackHub();
+            trackingTarget = TrackingState.HUB;
         } else {
             trackFerry();
+            trackingTarget = TrackingState.FERRY;
         }
     } else {
         if (robotPose.getX() < targetingSwitchX) {
             trackHub();
+            trackingTarget = TrackingState.HUB;
         } else {
             trackFerry();
+            trackingTarget = TrackingState.FERRY;
         }
     }
   }
@@ -270,12 +312,30 @@ public class Turret extends SubsystemBase {
       enableTracking = true;
     }
   }
+
+  public boolean canShoot() {
+    var turretReady = Math.abs(turret.getClosedLoopError().getValueAsDouble()) < TurretConstants.TURRET_READY_TOLERANCE_ROT;
+    var hoodReady = Math.abs(hood.getClosedLoopError().getValueAsDouble()) < TurretConstants.HOOD_READY_TOLERANCE_ROT;
+
+    var hubActiveOrFerrying = (trackingTarget == TrackingState.HUB && HubShiftUtil.getShiftedShiftInfo().active())
+        || trackingTarget == TrackingState.FERRY
+            && (driveState.Pose.getY() > Units.inchesToMeters(108.34) 
+                && driveState.Pose.getY() < Units.inchesToMeters(209.34));
+
+    return canShootDebounce.calculate(turretReady && hoodReady && hubActiveOrFerrying);
+  }
   
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if (enableTracking) {
-      setTurretTargetingMode();
-    }
+    driveState = drivetrain.getState();
+
+    if (enableTracking) {setTurretTargetingMode();}
+
+    isTrackingPub.set(enableTracking);
+    trackedTargetPub.set(trackingTarget.toString());
+    distanceToTrackedPub.set(String.format("%.2f", distanceToTrackedTarget));
+    hoodPosRotPub.set(String.format("%.3f", hood.getPosition().getValueAsDouble()));
+    shooterVelRpsPub.set(String.format("%.2f", shooterLeader.getVelocity().getValueAsDouble()));
   }
 }
