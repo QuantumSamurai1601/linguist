@@ -158,9 +158,16 @@ public class RobotContainer {
         joystick.x().whileTrue(hopper.runHopperUnstuck())
             .onFalse(hopper.runOnce(hopper::stopHopper));
 
-        joystick.y().whileTrue(intake.runOutake())
-            .onFalse(intake.runIntake());
-
+        joystick.y().whileTrue(Commands.runEnd(
+            () -> {
+                intake.runOutake();
+                hopper.runHopperUnstuck();
+            },
+            () -> {
+                intake.runIntake();
+                hopper.stopHopper();
+            }));          
+        
         joystick.back().onTrue(turret.runOnce(turret::toggleTracking));
 
         joystick.start().whileTrue(intake.intakeAgitate());
