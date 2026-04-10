@@ -8,13 +8,14 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
+// import edu.wpi.first.math.geometry.Rotation3d;
+// import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionConstants {
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+  public static double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
 
   // Camera names, must match names configured on coprocessor
   public static String camera0Name = "limelight-left"; // 10.16.1.11
@@ -28,13 +29,13 @@ public class VisionConstants {
   //     new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
 
   // Basic filtering thresholds
-  public static double maxAmbiguity = 0.3;
+  public static double maxAmbiguity = 0.25;
   public static double maxZError = 0.75;
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static double linearStdDevBaseline = 0.08; // Meters
-  public static double angularStdDevBaseline = 0.12; // Radians
+  public static double linearStdDevBaseline = 0.7; // Meters
+  public static double angularStdDevBaseline = 1.4; // Radians
 
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)
@@ -45,7 +46,7 @@ public class VisionConstants {
       };
 
   // Multipliers to apply for MegaTag 2 observations
-  public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
+  public static double linearStdDevMegatag2Factor = 1; // More stable than full 3D solve
   public static double angularStdDevMegatag2Factor =
       Double.POSITIVE_INFINITY; // No rotation data available
 
