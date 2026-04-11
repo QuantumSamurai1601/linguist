@@ -84,7 +84,7 @@
         "y": 7.437410525430013
       },
       "prevControl": {
-        "x": 3.4134599422431657,
+        "x": 3.4134599422431653,
         "y": 7.444877021498055
       },
       "nextControl": null,
@@ -128,8 +128,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 2.67,
+    "maxAcceleration": 7.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -140,7 +140,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "MFL",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

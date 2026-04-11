@@ -100,12 +100,12 @@
         "y": 0.7296129115814063
       },
       "prevControl": {
-        "x": 6.451830536029269,
-        "y": 0.7847376517981874
+        "x": 6.451830536029271,
+        "y": 0.7847376517981878
       },
       "nextControl": {
         "x": 5.1212751521970254,
-        "y": 0.48394830713131154
+        "y": 0.4839483071313115
       },
       "isLocked": false,
       "linkedName": null
@@ -160,8 +160,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 2.67,
+    "maxAcceleration": 7.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -172,7 +172,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "MFR",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
