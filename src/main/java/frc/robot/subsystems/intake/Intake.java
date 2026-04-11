@@ -110,14 +110,12 @@ public class Intake extends SubsystemBase {
     });
   }
 
-  public Command runIntake() {
-    return this.runOnce(() -> {
-      this.setIntakeVolts(IntakeConstants.INTAKING_VOLTS);
-      this.isIntakeWheelOn = true;
-    });
+  public void runIntake() {
+    this.setIntakeVolts(IntakeConstants.INTAKING_VOLTS);
+    this.isIntakeWheelOn = true;
   }
-  public Command runOutake() {
-    return this.runOnce(() -> this.setIntakeVolts(IntakeConstants.OUTAKING_VOLTS));
+  public void runOutake() {
+    this.setIntakeVolts(IntakeConstants.OUTAKING_VOLTS);
   }
   public Command stopIntake() {
     return this.runOnce(() -> {

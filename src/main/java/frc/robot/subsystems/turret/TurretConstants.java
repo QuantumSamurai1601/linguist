@@ -103,14 +103,14 @@ public class TurretConstants {
   static {
     hoodTreeMap.put(1.75, 0.005);
     hoodTreeMap.put(2.75, 0.038);
-    hoodTreeMap.put(3.75, 0.058);
-    hoodTreeMap.put(4.75, 0.060);
+    hoodTreeMap.put(3.75, 0.057);
+    hoodTreeMap.put(4.75, 0.059);
   }
 
   public static final double TURRET_ZERO_OFFSET_DEG = 90.0;
   public static final Translation2d ROBOT_TO_TURRET_METERS = new Translation2d(Units.inchesToMeters(5.21), 0);
-  public static final double TURRET_READY_TOLERANCE_ROT = Degrees.of(3.5).in(Rotations);
-  public static final double HOOD_READY_TOLERANCE_ROT = 0.003;
+  public static final double TURRET_READY_TOLERANCE_ROT = Degrees.of(5).in(Rotations);
+  public static final double HOOD_READY_TOLERANCE_ROT = 0.01;
   public static final double SHOOTER_READY_TOLERANCE_RPS = 5.0;
   public static final double MAX_SHOT_READY_OMEGA_RAD_PER_SEC = RotationsPerSecond.of(0.5).in(RadiansPerSecond);
 

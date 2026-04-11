@@ -38,8 +38,8 @@ public class Hopper extends SubsystemBase {
     return this.runOnce(() -> this.setHopperVelocity(HopperConstants.HOPPER_SHOOT_VELOCITY));
   }
 
-  public Command runHopperUnstuck() {
-    return this.runOnce(() -> this.setHopperVelocity(HopperConstants.HOPPER_UNSTUCK_VELOCITY));
+  public void runHopperUnstuck() {
+    this.setHopperVelocity(HopperConstants.HOPPER_UNSTUCK_VELOCITY);
   }
 
   @Override

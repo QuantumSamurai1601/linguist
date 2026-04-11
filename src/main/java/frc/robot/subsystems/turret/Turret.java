@@ -32,7 +32,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 @Logged
 public class Turret extends SubsystemBase {
-  private enum TrackingState {
+  public enum TrackingState {
     HUB,
     FERRY,
     NONE
@@ -43,10 +43,17 @@ public class Turret extends SubsystemBase {
   private StringPublisher distanceToTrackedPub = turretTable.getStringTopic("Tracked Target Dist.").publish();
   private StringPublisher hoodPosRotPub = turretTable.getStringTopic("Hood Position").publish();
   private StringPublisher shooterVelRpsPub = turretTable.getStringTopic("Shooter Speed").publish();
+  private BooleanPublisher turretReadyPub = turretTable.getBooleanTopic("Turret Ready?").publish();
+  private BooleanPublisher hubActiveOrFerryPub = turretTable.getBooleanTopic("Hub Active OR Ferry").publish();
+  private BooleanPublisher canShootPub = turretTable.getBooleanTopic("Can Shoot?").publish();
 
   public boolean enableTracking = true;
+  public boolean enableHood = false;
   public TrackingState trackingTarget = TrackingState.NONE;
   public double distanceToTrackedTarget = 0.0;
+  public boolean turretReady = false;
+  public boolean hubActiveOrFerrying = false;
+  public boolean canShoot = false;
 
   private final TalonFX turret = new TalonFX(22);
   private final TalonFX hood = new TalonFX(21);
@@ -58,7 +65,7 @@ public class Turret extends SubsystemBase {
   private final VelocityVoltage shooterLeaderRequest = new VelocityVoltage(0).withSlot(0).withEnableFOC(true);
   private final Follower shooterFollowerRequest = new Follower(29, MotorAlignmentValue.Opposed);
 
-  private final Debouncer canShootDebounce = new Debouncer(0.2);
+  private final Debouncer canShootDebounce = new Debouncer(0.1);
   private final CommandSwerveDrivetrain drivetrain;
   private SwerveDriveState driveState;
 
@@ -238,6 +245,16 @@ public class Turret extends SubsystemBase {
     setHoodPosRot(current - 0.005);
   }
 
+  public void toggleHood(boolean turnHoodOn) {
+    if (turnHoodOn && enableTracking) {
+      enableHood = true;
+      return;
+    }
+    if (!turnHoodOn) {
+      enableHood = false;
+      setHoodPosRot(0);}
+  }
+
   public void setShooterVel(double vel) {
     shooterTargetRps = vel;
     shooterLeader.setControl(shooterLeaderRequest.withVelocity(shooterTargetRps));
@@ -305,6 +322,7 @@ public class Turret extends SubsystemBase {
   public void toggleTracking() {
     if (enableTracking == true) {
       enableTracking = false;
+      enableHood = false;
       setTurretPosDeg(0);
       setShooterVel(30);
       setHoodPosRot(0);
@@ -313,16 +331,16 @@ public class Turret extends SubsystemBase {
     }
   }
 
-  public boolean canShoot() {
-    var turretReady = Math.abs(turret.getClosedLoopError().getValueAsDouble()) < TurretConstants.TURRET_READY_TOLERANCE_ROT;
-    var hoodReady = Math.abs(hood.getClosedLoopError().getValueAsDouble()) < TurretConstants.HOOD_READY_TOLERANCE_ROT;
+  public boolean readyToShoot() {
+    turretReady = Math.abs(turret.getClosedLoopError().getValueAsDouble()) < TurretConstants.TURRET_READY_TOLERANCE_ROT;
 
-    var hubActiveOrFerrying = (trackingTarget == TrackingState.HUB && HubShiftUtil.getShiftedShiftInfo().active())
-        || trackingTarget == TrackingState.FERRY
-            && (driveState.Pose.getY() > Units.inchesToMeters(108.34) 
-                && driveState.Pose.getY() < Units.inchesToMeters(209.34));
+    hubActiveOrFerrying = (trackingTarget == TrackingState.HUB && HubShiftUtil.getShiftedShiftInfo().active())
+        || trackingTarget == TrackingState.FERRY;
+            // && (driveState.Pose.getY() > Units.inchesToMeters(108.34) 
+                // && driveState.Pose.getY() < Units.inchesToMeters(209.34));
 
-    return canShootDebounce.calculate(turretReady && hoodReady && hubActiveOrFerrying);
+    canShoot = canShootDebounce.calculate(turretReady && hubActiveOrFerrying);
+    return canShoot;
   }
   
   @Override
@@ -331,11 +349,16 @@ public class Turret extends SubsystemBase {
     driveState = drivetrain.getState();
 
     if (enableTracking) {setTurretTargetingMode();}
+    if (enableHood) {setHoodPosRot();}
 
     isTrackingPub.set(enableTracking);
     trackedTargetPub.set(trackingTarget.toString());
     distanceToTrackedPub.set(String.format("%.2f", distanceToTrackedTarget));
     hoodPosRotPub.set(String.format("%.3f", hood.getPosition().getValueAsDouble()));
     shooterVelRpsPub.set(String.format("%.2f", shooterLeader.getVelocity().getValueAsDouble()));
+
+    turretReadyPub.set(turretReady);
+    hubActiveOrFerryPub.set(hubActiveOrFerrying);
+    canShootPub.set(canShoot);
   }
 }

@@ -48,5 +48,5 @@ public class IntakeConstants {
   public static final double INTAKE_STOW_POS = 0.23;
   public static final double INTAKE_EXTEND_POS = 0.645;
   public static final double INTAKE_AGITATE_POS = 0.01;
-  public static final double INTAKE_AGITATE_MOVE_TIME_SEC = 0.67;
+  public static final double INTAKE_AGITATE_MOVE_TIME_SEC = 0.59;
 }

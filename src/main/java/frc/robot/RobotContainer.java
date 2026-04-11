@@ -36,6 +36,7 @@ import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.tower.Tower;
 import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.turret.Turret.TrackingState;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionLimelight;
 
@@ -55,9 +56,9 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
-    private final SlewRateLimiter sotmAccelerationLimX = new SlewRateLimiter(0.15);
-    private final SlewRateLimiter sotmAccelerationLimY = new SlewRateLimiter(0.15);
-    private final SlewRateLimiter sotmAccelerationLimRot = new SlewRateLimiter(0.02);
+    private final SlewRateLimiter sotmAccelerationLimX = new SlewRateLimiter(1.2);
+    private final SlewRateLimiter sotmAccelerationLimY = new SlewRateLimiter(1.2);
+    private final SlewRateLimiter sotmAccelerationLimRot = new SlewRateLimiter(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -73,37 +74,6 @@ public class RobotContainer {
 
     public RobotContainer() {
         DataLogManager.start();
-        NamedCommands.registerCommand("intakeextend", Commands.sequence(
-            intake.extendIntake()
-        ));
-        NamedCommands.registerCommand("shootmfl", Commands.deadline(
-            Commands.waitSeconds(4),
-            hopper.runHopperShoot(),
-            tower.runTowerShoot(),
-            Commands.sequence(
-                Commands.waitSeconds(2),
-                intake.intakeAgitate()
-            )
-        ).finallyDo(() -> {
-            hopper.stopHopper();
-            tower.stopTower();
-        }));
-        NamedCommands.registerCommand("shootmfr", Commands.deadline(
-            Commands.waitSeconds(4),
-            hopper.runHopperShoot(),
-            tower.runTowerShoot(),
-            Commands.sequence(
-                Commands.waitSeconds(2),
-                intake.intakeAgitate()
-            )
-        ).finallyDo(() -> {
-            hopper.stopHopper();
-            tower.stopTower();
-        }));
-
-        autoChooser = AutoBuilder.buildAutoChooser("MFRLONG");
-        SmartDashboard.putData("Auto Mode", autoChooser);
-
         vision =
             new Vision(
                 drivetrain::addVisionMeasurement,
@@ -111,6 +81,48 @@ public class RobotContainer {
                 new VisionLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
 
         turret = new Turret(drivetrain);
+
+        NamedCommands.registerCommand("intakeextend", Commands.sequence(
+            intake.extendIntake()
+        ));
+        NamedCommands.registerCommand("shootmfl", Commands.deadline(
+            Commands.waitSeconds(4),
+            Commands.sequence(
+                turret.runOnce(() -> turret.toggleHood(true)),
+                Commands.waitSeconds(0.2),
+                Commands.parallel(
+                    hopper.runHopperShoot(),
+                    tower.runTowerShoot()
+                ),
+                Commands.waitSeconds(3),
+                intake.intakeAgitate()
+            )
+        ).finallyDo(() -> {
+            hopper.stopHopper();
+            tower.stopTower();
+            turret.toggleHood(false);
+        }));
+
+        NamedCommands.registerCommand("shootmfr", Commands.deadline(
+            Commands.waitSeconds(4),
+            Commands.sequence(
+                turret.runOnce(() -> turret.toggleHood(true)),
+                Commands.waitSeconds(0.2),
+                Commands.parallel(
+                    hopper.runHopperShoot(),
+                    tower.runTowerShoot()
+                ),
+                Commands.waitSeconds(3),
+                intake.intakeAgitate()
+            )
+        ).finallyDo(() -> {
+            hopper.stopHopper();
+            tower.stopTower();
+            turret.toggleHood(false);
+        }));
+
+        autoChooser = AutoBuilder.buildAutoChooser("MFRLONG");
+        SmartDashboard.putData("Auto Mode", autoChooser);
 
         configureBindings();
 
@@ -155,7 +167,7 @@ public class RobotContainer {
             () -> intake.isIntakeExtended
         ));
 
-        joystick.x().whileTrue(hopper.runHopperUnstuck())
+        joystick.x().whileTrue(hopper.runOnce(hopper::runHopperUnstuck))
             .onFalse(hopper.runOnce(hopper::stopHopper));
 
         joystick.y().whileTrue(Commands.runEnd(
@@ -172,22 +184,28 @@ public class RobotContainer {
 
         joystick.start().whileTrue(intake.intakeAgitate());
 
-        joystick.rightTrigger(0.5)
-            .and(turret::canShoot)
-            .whileTrue(Commands.parallel(
-                hopper.runHopperShoot(),
-                tower.runTowerShoot(),
-                turret.run(() -> turret.setHoodPosRot()),
-                drivetrain.applyRequest(() ->
-                    drive.withVelocityX(sotmAccelerationLimY.calculate(-joystick.getLeftY() * MaxSpeed * 0.5)) // Drive forward with negative Y (forward)
-                        .withVelocityY(sotmAccelerationLimX.calculate(-joystick.getLeftX() * MaxSpeed * 0.5)) // Drive left with negative X (left)
-                        .withRotationalRate(sotmAccelerationLimRot.calculate(-joystick.getRightX() * MaxAngularRate * 0.5)) // Drive counterclockwise with negative X (left)
+        joystick.rightTrigger(0.3)
+            .and(turret::readyToShoot)
+            .whileTrue(Commands.sequence(
+                turret.runOnce(() -> turret.toggleHood(true)),
+                Commands.waitSeconds(0.2),
+                Commands.parallel(
+                    hopper.runHopperShoot(),
+                    tower.runTowerShoot(),
+                    drivetrain.applyRequest(() ->
+                        drive.withVelocityX(-joystick.getLeftY() * MaxSpeed * 0.2) // Drive forward with negative Y (forward)
+                            .withVelocityY(-joystick.getLeftX() * MaxSpeed * 0.2) // Drive left with negative X (left)
+                            .withRotationalRate(-joystick.getRightX() * MaxAngularRate * 0.5) // Drive counterclockwise with negative X (left)
+                    ).onlyWhile(() -> turret.trackingTarget == TrackingState.HUB)
                 )
             ))
             .onFalse(Commands.parallel(
                 hopper.runOnce(hopper::stopHopper),
                 tower.runOnce(tower::stopTower),
-                turret.runOnce(() -> turret.setHoodPosRot(0))
+                turret.runOnce(() -> {
+                    turret.toggleHood(false);
+                    turret.setHoodPosRot(0);
+                })
             ));
 
         joystick.povUp().onTrue(turret.runOnce(turret::hoodInchUp));
@@ -221,9 +239,13 @@ public class RobotContainer {
         RobotModeTriggers.disabled()
             .whileTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-right", 1)));
         RobotModeTriggers.autonomous()
-            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-left", 4)));
+            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-left", 3)));
         RobotModeTriggers.autonomous()
-            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-right", 4)));
+            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-right", 3)));
+        RobotModeTriggers.teleop()
+            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-left", 4)));
+        RobotModeTriggers.teleop()
+            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-right", 4)));            
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

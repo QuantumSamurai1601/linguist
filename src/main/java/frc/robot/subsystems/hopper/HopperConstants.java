@@ -15,7 +15,7 @@ public class HopperConstants {
 
     hopperConfig.Slot0.kS = 0.35;
     hopperConfig.Slot0.kV = 0.22;
-    hopperConfig.Slot0.kP = 1.05;
+    hopperConfig.Slot0.kP = 1.03;
     hopperConfig.Slot0.kD = 0.01;
 
     hopperConfig.Feedback.SensorToMechanismRatio = 2;

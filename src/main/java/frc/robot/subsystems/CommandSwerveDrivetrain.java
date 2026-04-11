@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -328,13 +329,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs
     ) { 
-        // var estimatedPose = samplePoseAt(timestampSeconds);
-        // if (estimatedPose.isPresent()) {
-        //     double errorMeters = estimatedPose.get().getTranslation().getDistance(visionRobotPoseMeters.getTranslation());
-        //     if (errorMeters > 1.0) {
-        //         return;
-        //     }
-        // }
+        var estimatedPose = samplePoseAt(timestampSeconds);
+        if (estimatedPose.isPresent()) {
+            var errorMeters = estimatedPose.get().getTranslation().getDistance(visionRobotPoseMeters.getTranslation());
+            if (errorMeters > Units.inchesToMeters(1.601) || this.getState().Speeds.omegaRadiansPerSecond > Units.degreesToRadians(180)) {
+                return;
+            }
+        }
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
     }
 
