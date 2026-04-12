@@ -1,13 +1,13 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -18,7 +18,9 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
@@ -31,8 +33,14 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import limelight.Limelight;
+import limelight.networktables.AngularVelocity3d;
+import limelight.networktables.LimelightPoseEstimator;
+import limelight.networktables.Orientation3d;
+import limelight.networktables.PoseEstimate;
+import limelight.networktables.LimelightPoseEstimator.EstimationMode;
+import limelight.networktables.LimelightResults;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -123,6 +131,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+
+    private Limelight[] limelights = {
+        new Limelight("limelight-left"), 
+        new Limelight("limelight-right")
+    };
+
+    private LimelightPoseEstimator[] limelightPoseEstimators = {
+        limelights[0].createPoseEstimator(EstimationMode.MEGATAG2),
+        limelights[1].createPoseEstimator(EstimationMode.MEGATAG2)
+    };
+
+    // private int outofAreaReading = 0;
+    private boolean initialReading = false;
+    private final int[] outOfAreaReadings = new int[limelights.length];
+
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -232,9 +255,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
     }
 
-    public void toggleVisionFilters(boolean shouldEnableFilters) {
-        m_visionFiltersEnabled = shouldEnableFilters;
-    }
+    // public void toggleVisionFilters(boolean shouldEnableFilters) {
+    //     m_visionFiltersEnabled = shouldEnableFilters;
+    // }
 
     /**
      * Returns a command that applies the specified control request to this swerve drivetrain.
@@ -287,6 +310,55 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+        for (int i=0; i < limelights.length; i++) {
+            Limelight limelight = limelights[i];
+            LimelightPoseEstimator estimator = limelightPoseEstimators[i];
+
+            limelight.getSettings()
+                .withRobotOrientation(new Orientation3d(this.getRotation3d(), 
+                    new AngularVelocity3d(DegreesPerSecond.of(this.getPigeon2().getAngularVelocityXWorld().getValueAsDouble()), 
+                        DegreesPerSecond.of(this.getPigeon2().getAngularVelocityYDevice().getValueAsDouble()), 
+                        DegreesPerSecond.of(this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble()))))
+                .save();
+            
+            Optional<PoseEstimate> poseEstimates = estimator.getPoseEstimate();
+
+            if (poseEstimates.isEmpty()) {
+                continue;
+            }
+
+            PoseEstimate poseEstimate = poseEstimates.get();
+            Pose3d estimatorPose = poseEstimate.pose;
+            SwerveDriveState driveState = this.getState();
+            double distanceToPose = estimatorPose.toPose2d().getTranslation().getDistance(driveState.Pose.getTranslation());
+
+            if (estimatorPose.getX() < 0.0
+                || estimatorPose.getX() > aprilTagLayout.getFieldLength()
+                || estimatorPose.getY() < 0.0
+                || estimatorPose.getY() > aprilTagLayout.getFieldWidth()
+                || poseEstimate.avgTagDist > 2
+                || poseEstimate.tagCount <= 0
+                || (poseEstimate.tagCount == 1 && poseEstimate.getAvgTagAmbiguity() > 0.3)
+                || Math.abs(estimatorPose.getZ()) > 0.3
+                || Math.abs(driveState.Speeds.vxMetersPerSecond) > 2.67
+                || Math.abs(driveState.Speeds.vyMetersPerSecond) > 2.67
+                || Math.abs(driveState.Speeds.omegaRadiansPerSecond) > Units.degreesToRadians(360)) {
+                continue;
+            }
+
+            if (distanceToPose < 0.5 
+                || (outOfAreaReadings[i] > 10 && !initialReading)
+                || outOfAreaReadings[i] > 10) {
+
+                if (!initialReading) {initialReading = true;}
+                outOfAreaReadings[i] = 0;
+                this.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 9999999));
+                this.addVisionMeasurement(estimatorPose.toPose2d(), poseEstimate.timestampSeconds);
+            } else {
+                outOfAreaReadings[i] += 1;
+            }
+        }
     }
 
     private void startSimThread() {
@@ -335,22 +407,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs
     ) { 
-        if (m_visionFiltersEnabled) {
-        var estimatedPose = samplePoseAt(timestampSeconds);
-        if (estimatedPose.isPresent()) {
-            var errorMeters = estimatedPose.get().getTranslation().getDistance(visionRobotPoseMeters.getTranslation());
-            var teleportClamp = Units.inchesToMeters(6.7);
-            var driveState = this.getState();
-            if (DriverStation.isTeleop()) {teleportClamp = 0.15;}
-            if (errorMeters > teleportClamp
-                || driveState.Speeds.omegaRadiansPerSecond > Units.degreesToRadians(180) 
-                || driveState.Speeds.vxMetersPerSecond > 2.67 
-                || driveState.Speeds.vyMetersPerSecond > 2.67) {
-                return;
-            }
-        }
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
-        }
     }
 
     /**

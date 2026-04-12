@@ -16,7 +16,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
 // import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -37,8 +36,8 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.tower.Tower;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.Turret.TrackingState;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionLimelight;
+// import frc.robot.subsystems.vision.Vision;
+// import frc.robot.subsystems.vision.VisionLimelight;
 
 public class RobotContainer {
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -56,9 +55,6 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
-    private final SlewRateLimiter sotmAccelerationLimX = new SlewRateLimiter(1.2);
-    private final SlewRateLimiter sotmAccelerationLimY = new SlewRateLimiter(1.2);
-    private final SlewRateLimiter sotmAccelerationLimRot = new SlewRateLimiter(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -66,7 +62,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     /* Create all subsystems */
-    private final Vision vision;
+    // private final Vision vision;
     private final Hopper hopper = new Hopper();
     private final Intake intake = new Intake();
     private final Tower tower = new Tower();
@@ -74,11 +70,11 @@ public class RobotContainer {
 
     public RobotContainer() {
         DataLogManager.start();
-        vision =
-            new Vision(
-                drivetrain::addVisionMeasurement,
-                new VisionLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()),
-                new VisionLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
+        // vision =
+        //     new Vision(
+        //         drivetrain::addVisionMeasurement,
+        //         new VisionLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()),
+        //         new VisionLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
 
         turret = new Turret(drivetrain);
 
@@ -176,8 +172,8 @@ public class RobotContainer {
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-        joystick.rightBumper().whileTrue(drivetrain.runOnce(() -> drivetrain.toggleVisionFilters(false))
-            .finallyDo(() -> drivetrain.toggleVisionFilters(true)));
+        // joystick.rightBumper().whileTrue(drivetrain.runOnce(() -> drivetrain.toggleVisionFilters(false))
+        //     .finallyDo(() -> drivetrain.toggleVisionFilters(true)));
 
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
 
@@ -213,9 +209,9 @@ public class RobotContainer {
                     hopper.runHopperShoot(),
                     tower.runTowerShoot(),
                     drivetrain.applyRequest(() ->
-                        drive.withVelocityX(-joystick.getLeftY() * MaxSpeed * 0.2) // Drive forward with negative Y (forward)
-                            .withVelocityY(-joystick.getLeftX() * MaxSpeed * 0.2) // Drive left with negative X (left)
-                            .withRotationalRate(-joystick.getRightX() * MaxAngularRate * 0.5) // Drive counterclockwise with negative X (left)
+                        drive.withVelocityX(-joystick.getLeftY() * MaxSpeed * 0.15) // Drive forward with negative Y (forward)
+                            .withVelocityY(-joystick.getLeftX() * MaxSpeed * 0.15) // Drive left with negative X (left)
+                            .withRotationalRate(-joystick.getRightX() * MaxAngularRate * 0.3) // Drive counterclockwise with negative X (left)
                     ).onlyWhile(() -> turret.trackingTarget == TrackingState.HUB)
                 )
             ))
