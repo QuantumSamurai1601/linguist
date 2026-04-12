@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 // import edu.wpi.first.math.geometry.Rotation3d;
 // import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 
 public class VisionConstants {
   // AprilTag layout
@@ -31,11 +32,13 @@ public class VisionConstants {
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.2;
   public static double maxZError = 0.1;
+  public static double maxTagDistance = Units.inchesToMeters(66.0);
+  public static double maxTagArea = 0.06;
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static double linearStdDevBaseline = 3.5; // Meters
-  public static double angularStdDevBaseline = 6.28; // Radians
+  public static double linearStdDevBaseline = 0.5; // Meters
+  public static double angularStdDevBaseline = 1; // Radians
 
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)
@@ -60,7 +63,8 @@ public class VisionConstants {
       double ambiguity,
       int tagCount,
       double averageTagDistance,
-      PoseObservationType type) {}
+      PoseObservationType type,
+      double averageTagArea) {}
 
   public static enum PoseObservationType {
     MEGATAG_1,

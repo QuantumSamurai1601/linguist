@@ -80,8 +80,8 @@ public class TurretConstants {
     shooterTreeMap.put(1.75, 28.0);
     shooterTreeMap.put(2.75, 32.0);
     shooterTreeMap.put(3.75, 34.0);
-    shooterTreeMap.put(4.75, 37.0);
-    shooterTreeMap.put(5.75, 40.0);
+    shooterTreeMap.put(4.75, 36.0);
+    shooterTreeMap.put(5.75, 39.0);
 
     shooterTreeMap.put(6.75, 42.0);
     shooterTreeMap.put(7.75, 46.0);
@@ -96,15 +96,15 @@ public class TurretConstants {
     flightTimeTreeMap.put(2.75, 1.1);
     flightTimeTreeMap.put(3.75, 1.2);
     flightTimeTreeMap.put(4.75, 1.4);
-    flightTimeTreeMap.put(5.75, 1.6);
+    flightTimeTreeMap.put(5.75, 1.5);
   }
 
   public static final InterpolatingDoubleTreeMap hoodTreeMap = new InterpolatingDoubleTreeMap();
   static {
     hoodTreeMap.put(1.75, 0.005);
     hoodTreeMap.put(2.75, 0.038);
-    hoodTreeMap.put(3.75, 0.057);
-    hoodTreeMap.put(4.75, 0.059);
+    hoodTreeMap.put(3.75, 0.054);
+    hoodTreeMap.put(4.75, 0.056);
   }
 
   public static final double TURRET_ZERO_OFFSET_DEG = 90.0;

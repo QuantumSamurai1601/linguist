@@ -85,6 +85,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("intakeextend", Commands.sequence(
             intake.extendIntake()
         ));
+
         NamedCommands.registerCommand("shootmfl", Commands.deadline(
             Commands.waitSeconds(4),
             Commands.sequence(
@@ -120,6 +121,22 @@ public class RobotContainer {
             tower.stopTower();
             turret.toggleHood(false);
         }));
+
+        NamedCommands.registerCommand("shootferry", Commands.deadline(
+            Commands.waitSeconds(4),
+            Commands.sequence(
+                turret.runOnce(() -> turret.toggleHood(true)),
+                Commands.waitSeconds(0.2),
+                Commands.parallel(
+                    hopper.runHopperShoot(),
+                    tower.runTowerShoot()
+                )
+            )
+        ).finallyDo(() -> {
+            hopper.stopHopper();
+            tower.stopTower();
+            turret.toggleHood(false);
+        }));        
 
         autoChooser = AutoBuilder.buildAutoChooser("MFRLONG");
         SmartDashboard.putData("Auto Mode", autoChooser);
@@ -158,6 +175,9 @@ public class RobotContainer {
 
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
+        joystick.rightBumper().whileTrue(drivetrain.runOnce(() -> drivetrain.toggleVisionFilters(false))
+            .finallyDo(() -> drivetrain.toggleVisionFilters(true)));
 
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
 
@@ -245,7 +265,10 @@ public class RobotContainer {
         RobotModeTriggers.teleop()
             .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-left", 4)));
         RobotModeTriggers.teleop()
-            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-right", 4)));            
+            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-right", 4)));
+            
+        RobotModeTriggers.teleop()
+            .onTrue(Commands.runOnce(() -> turret.toggleHood(false)));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

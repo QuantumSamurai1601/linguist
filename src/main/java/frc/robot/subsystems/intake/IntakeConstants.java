@@ -10,8 +10,8 @@ public class IntakeConstants {
     intakeRollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     intakeRollerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-    intakeRollerConfig.CurrentLimits.SupplyCurrentLimit = 20;
-    intakeRollerConfig.CurrentLimits.StatorCurrentLimit = 60;
+    intakeRollerConfig.CurrentLimits.SupplyCurrentLimit = 25;
+    intakeRollerConfig.CurrentLimits.StatorCurrentLimit = 100;
     intakeRollerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     intakeRollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
@@ -24,7 +24,7 @@ public class IntakeConstants {
     intakeExtendConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     intakeExtendConfig.CurrentLimits.SupplyCurrentLimit = 40;
-    intakeExtendConfig.CurrentLimits.StatorCurrentLimit = 100;
+    intakeExtendConfig.CurrentLimits.StatorCurrentLimit = 80;
     intakeExtendConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     intakeExtendConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
@@ -46,7 +46,7 @@ public class IntakeConstants {
   public static final double OUTAKING_VOLTS = -5.67;
   public static final double INTAKE_EXTEND_ASSIST_TIME_SEC = 0.1;
   public static final double INTAKE_STOW_POS = 0.23;
-  public static final double INTAKE_EXTEND_POS = 0.645;
-  public static final double INTAKE_AGITATE_POS = 0.01;
-  public static final double INTAKE_AGITATE_MOVE_TIME_SEC = 0.59;
+  public static final double INTAKE_EXTEND_POS = 0.648;
+  public static final double INTAKE_AGITATE_POS = 0.005;
+  public static final double INTAKE_AGITATE_MOVE_TIME_SEC = 0.5;
 }

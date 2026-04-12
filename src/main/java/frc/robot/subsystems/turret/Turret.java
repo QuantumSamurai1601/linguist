@@ -249,10 +249,13 @@ public class Turret extends SubsystemBase {
     if (turnHoodOn && enableTracking) {
       enableHood = true;
       return;
-    }
-    if (!turnHoodOn) {
+    } else if (turnHoodOn) {
+      setHoodPosRot(0.04);
+      return;
+    } else if (!turnHoodOn) {
       enableHood = false;
-      setHoodPosRot(0);}
+      setHoodPosRot(0);
+    }
   }
 
   public void setShooterVel(double vel) {
@@ -324,7 +327,7 @@ public class Turret extends SubsystemBase {
       enableTracking = false;
       enableHood = false;
       setTurretPosDeg(0);
-      setShooterVel(30);
+      setShooterVel(31);
       setHoodPosRot(0);
     } else if (enableTracking == false) {
       enableTracking = true;
@@ -335,9 +338,9 @@ public class Turret extends SubsystemBase {
     turretReady = Math.abs(turret.getClosedLoopError().getValueAsDouble()) < TurretConstants.TURRET_READY_TOLERANCE_ROT;
 
     hubActiveOrFerrying = (trackingTarget == TrackingState.HUB && HubShiftUtil.getShiftedShiftInfo().active())
-        || trackingTarget == TrackingState.FERRY;
-            // && (driveState.Pose.getY() > Units.inchesToMeters(108.34) 
-                // && driveState.Pose.getY() < Units.inchesToMeters(209.34));
+        || trackingTarget == TrackingState.FERRY
+            && !(driveState.Pose.getY() > Units.inchesToMeters(135.34) 
+                && driveState.Pose.getY() < Units.inchesToMeters(182.34));
 
     canShoot = canShootDebounce.calculate(turretReady && hubActiveOrFerrying);
     return canShoot;

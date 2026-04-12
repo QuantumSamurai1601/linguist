@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -51,6 +52,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
+    private boolean m_visionFiltersEnabled = true;
 
     /** Swerve request to apply during robot-centric path following */
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
@@ -230,6 +232,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
     }
 
+    public void toggleVisionFilters(boolean shouldEnableFilters) {
+        m_visionFiltersEnabled = shouldEnableFilters;
+    }
+
     /**
      * Returns a command that applies the specified control request to this swerve drivetrain.
      *
@@ -329,14 +335,22 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs
     ) { 
+        if (m_visionFiltersEnabled) {
         var estimatedPose = samplePoseAt(timestampSeconds);
         if (estimatedPose.isPresent()) {
             var errorMeters = estimatedPose.get().getTranslation().getDistance(visionRobotPoseMeters.getTranslation());
-            if (errorMeters > Units.inchesToMeters(1.601) || this.getState().Speeds.omegaRadiansPerSecond > Units.degreesToRadians(180)) {
+            var teleportClamp = Units.inchesToMeters(6.7);
+            var driveState = this.getState();
+            if (DriverStation.isTeleop()) {teleportClamp = 0.15;}
+            if (errorMeters > teleportClamp
+                || driveState.Speeds.omegaRadiansPerSecond > Units.degreesToRadians(180) 
+                || driveState.Speeds.vxMetersPerSecond > 2.67 
+                || driveState.Speeds.vyMetersPerSecond > 2.67) {
                 return;
             }
         }
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
+        }
     }
 
     /**

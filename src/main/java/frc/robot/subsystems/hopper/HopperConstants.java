@@ -10,7 +10,7 @@ public class HopperConstants {
     hopperConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     hopperConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-    hopperConfig.CurrentLimits.SupplyCurrentLimit = 20;
+    hopperConfig.CurrentLimits.SupplyCurrentLimit = 40;
     hopperConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     hopperConfig.Slot0.kS = 0.35;
@@ -22,6 +22,6 @@ public class HopperConstants {
   }
 
   public static final double HOPPER_INTAKE_VELOCITY = 10;
-  public static final double HOPPER_SHOOT_VELOCITY = 24;
+  public static final double HOPPER_SHOOT_VELOCITY = 28;
   public static final double HOPPER_UNSTUCK_VELOCITY = -24;
 }

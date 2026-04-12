@@ -10,7 +10,7 @@ public class TowerConstants {
     towerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     towerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-    towerConfig.CurrentLimits.SupplyCurrentLimit = 20;
+    towerConfig.CurrentLimits.SupplyCurrentLimit = 40;
     towerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     towerConfig.Slot0.kS = 0.41;
@@ -21,6 +21,6 @@ public class TowerConstants {
     towerConfig.Feedback.SensorToMechanismRatio = 3;
   }
 
-  public static final double TOWER_SHOOT_VELOCITY = 24;
+  public static final double TOWER_SHOOT_VELOCITY = 28;
   public static final double TOWER_UNSTUCK_VELOCITY = -24;
 }
