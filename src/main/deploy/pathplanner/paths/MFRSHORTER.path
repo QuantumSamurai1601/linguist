@@ -1,0 +1,149 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.427312646875241,
+        "y": 0.635
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.925300715693721,
+        "y": 0.6964859709563087
+      },
+      "isLocked": false,
+      "linkedName": "MFRSTART"
+    },
+    {
+      "anchor": {
+        "x": 7.4647250298394106,
+        "y": 2.224322558367694
+      },
+      "prevControl": {
+        "x": 7.496368905788312,
+        "y": 1.8241507556778176
+      },
+      "nextControl": {
+        "x": 7.433081153890509,
+        "y": 2.624494361057571
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.4213933738425935,
+        "y": 2.788071831597223
+      },
+      "prevControl": {
+        "x": 7.439987687590958,
+        "y": 2.3607578121826323
+      },
+      "nextControl": {
+        "x": 7.402799060094229,
+        "y": 3.215385851011814
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.2541654538755065,
+        "y": 1.236829711914063
+      },
+      "prevControl": {
+        "x": 7.6374825692396024,
+        "y": 1.9833068607789572
+      },
+      "nextControl": {
+        "x": 6.995388287579572,
+        "y": 0.7328834138093169
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.973738604014731,
+        "y": 0.6960996505662138
+      },
+      "prevControl": {
+        "x": 6.583538981099236,
+        "y": 0.7513856821278013
+      },
+      "nextControl": {
+        "x": 4.831864073805034,
+        "y": 0.5925744418440193
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.521166755413187,
+        "y": 0.5915190778459829
+      },
+      "prevControl": {
+        "x": 4.70863839623963,
+        "y": 0.5478925936092897
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "HONEYMUSTARDCHICKEN"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.664543295806308,
+      "rotationDegrees": -61.0
+    },
+    {
+      "waypointRelativePos": 2.093994332559453,
+      "rotationDegrees": -61.0
+    },
+    {
+      "waypointRelativePos": 3.1145741204795603,
+      "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 4.082090678967925,
+      "rotationDegrees": -179.73511887744849
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.5707937682338421,
+      "maxWaypointRelativePos": 2.0333780120904397,
+      "constraints": {
+        "maxVelocity": 1.3,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}

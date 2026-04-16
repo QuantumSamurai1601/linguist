@@ -22,6 +22,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -40,7 +41,6 @@ import limelight.networktables.LimelightPoseEstimator;
 import limelight.networktables.Orientation3d;
 import limelight.networktables.PoseEstimate;
 import limelight.networktables.LimelightPoseEstimator.EstimationMode;
-import limelight.networktables.LimelightResults;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -291,6 +291,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return m_sysIdRoutineToApply.dynamic(direction);
     }
 
+    private Matrix<N3, N1> computeStdDevs(double avgTagDist, double numTags) {
+        Matrix<N3, N1> estStdDevs = kSingleTagStdDevs;
+        if (numTags == 0) {
+            estStdDevs = kSingleTagStdDevs;
+        } else {
+            if (numTags > 1) estStdDevs = kMultiTagStdDevs;
+            if (numTags == 1 && avgTagDist > 4)
+                estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+            else estStdDevs = estStdDevs.times(1 + (avgTagDist * avgTagDist / 30));
+        }
+        return estStdDevs;
+    }
     @Override
     public void periodic() {
         /*
@@ -318,7 +330,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             limelight.getSettings()
                 .withRobotOrientation(new Orientation3d(this.getRotation3d(), 
                     new AngularVelocity3d(DegreesPerSecond.of(this.getPigeon2().getAngularVelocityXWorld().getValueAsDouble()), 
-                        DegreesPerSecond.of(this.getPigeon2().getAngularVelocityYDevice().getValueAsDouble()), 
+                        DegreesPerSecond.of(this.getPigeon2().getAngularVelocityYWorld().getValueAsDouble()), 
                         DegreesPerSecond.of(this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble()))))
                 .save();
             
@@ -331,32 +343,49 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             PoseEstimate poseEstimate = poseEstimates.get();
             Pose3d estimatorPose = poseEstimate.pose;
             SwerveDriveState driveState = this.getState();
+            // double driveStateX = driveState.Pose.getX();
+            // double driveStateY = driveState.Pose.getY();
+
+            // if (driveStateX < 0.0) {
+            //     this.resetTranslation(new Translation2d(0.0, driveStateY));
+            // }
+            // if (driveStateX > FIELD_LENGTH) {
+            //     this.resetTranslation(new Translation2d(FIELD_LENGTH, driveStateY));
+            // }
+            // if (driveStateY < 0.0) {
+            //     this.resetTranslation(new Translation2d(driveStateX, 0.0));
+            // }
+            // if (driveStateY > FIELD_WIDTH) {
+            //     this.resetTranslation(new Translation2d(driveStateY, FIELD_LENGTH));
+            // }
+
+            // driveState = this.getState();
             double distanceToPose = estimatorPose.toPose2d().getTranslation().getDistance(driveState.Pose.getTranslation());
 
             if (estimatorPose.getX() < 0.0
-                || estimatorPose.getX() > aprilTagLayout.getFieldLength()
+                || estimatorPose.getX() > FIELD_LENGTH
                 || estimatorPose.getY() < 0.0
-                || estimatorPose.getY() > aprilTagLayout.getFieldWidth()
-                || poseEstimate.avgTagDist > 2
+                || estimatorPose.getY() > FIELD_WIDTH
                 || poseEstimate.tagCount <= 0
-                || (poseEstimate.tagCount == 1 && poseEstimate.getAvgTagAmbiguity() > 0.3)
-                || Math.abs(estimatorPose.getZ()) > 0.3
-                || Math.abs(driveState.Speeds.vxMetersPerSecond) > 2.67
-                || Math.abs(driveState.Speeds.vyMetersPerSecond) > 2.67
+                || (poseEstimate.tagCount == 1 && poseEstimate.getAvgTagAmbiguity() > 0.5)
+                || Math.abs(estimatorPose.getZ()) > 0.4
                 || Math.abs(driveState.Speeds.omegaRadiansPerSecond) > Units.degreesToRadians(360)) {
                 continue;
             }
-
-            if (distanceToPose < 0.5 
-                || (outOfAreaReadings[i] > 10 && !initialReading)
-                || outOfAreaReadings[i] > 10) {
-
-                if (!initialReading) {initialReading = true;}
-                outOfAreaReadings[i] = 0;
-                this.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 9999999));
+            if (DriverStation.isAutonomous()) {
+                continue;                
+            }
+            // if (driveStateX < 0.0
+            //     || driveStateX > FIELD_LENGTH
+            //     || driveStateY < 0.0
+            //     || driveStateY > FIELD_WIDTH) {
+            //     this.setVisionMeasurementStdDevs(computeStdDevs(poseEstimate.avgTagDist, poseEstimate.tagCount));
+            //     this.addVisionMeasurement(estimatorPose.toPose2d(), poseEstimate.timestampSeconds);
+            //     continue;
+            // }
+            if (distanceToPose < 0.25) {
+                this.setVisionMeasurementStdDevs(computeStdDevs(poseEstimate.avgTagDist, poseEstimate.tagCount));
                 this.addVisionMeasurement(estimatorPose.toPose2d(), poseEstimate.timestampSeconds);
-            } else {
-                outOfAreaReadings[i] += 1;
             }
         }
     }
