@@ -21,6 +21,8 @@ public class TowerConstants {
     towerConfig.Feedback.SensorToMechanismRatio = 3;
   }
 
-  public static final double TOWER_SHOOT_VELOCITY = 28;
+  public static final int TowerMotorID = 33;
+
+  public static final double TOWER_SHOOT_VELOCITY = 24;
   public static final double TOWER_UNSTUCK_VELOCITY = -24;
 }
