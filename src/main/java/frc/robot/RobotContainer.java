@@ -7,8 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
-import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -16,7 +15,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
 // import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -25,6 +23,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -38,7 +37,7 @@ import frc.robot.subsystems.tower.Tower;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.Turret.TrackingState;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionLimelight;
+import frc.robot.subsystems.vision.VisionPhoton;
 
 public class RobotContainer {
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -56,9 +55,6 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
-    private final SlewRateLimiter sotmAccelerationLimX = new SlewRateLimiter(1.2);
-    private final SlewRateLimiter sotmAccelerationLimY = new SlewRateLimiter(1.2);
-    private final SlewRateLimiter sotmAccelerationLimRot = new SlewRateLimiter(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -66,7 +62,6 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     /* Create all subsystems */
-    private final Vision vision;
     private final Hopper hopper = new Hopper();
     private final Intake intake = new Intake();
     private final Tower tower = new Tower();
@@ -74,11 +69,12 @@ public class RobotContainer {
 
     public RobotContainer() {
         DataLogManager.start();
-        vision =
-            new Vision(
-                drivetrain::addVisionMeasurement,
-                new VisionLimelight(camera0Name, () -> drivetrain.getState().Pose.getRotation()),
-                new VisionLimelight(camera1Name, () -> drivetrain.getState().Pose.getRotation()));
+
+        new Vision(
+            drivetrain::addVisionMeasurement,
+            new VisionPhoton(camera0Name, robotToCamera0),
+            new VisionPhoton(camera1Name, robotToCamera1),
+            new VisionPhoton(camera2Name, robotToCamera2));
 
         turret = new Turret(drivetrain);
 
@@ -144,7 +140,7 @@ public class RobotContainer {
         configureBindings();
 
         // Warmup PathPlanner to avoid Java pauses
-        FollowPathCommand.warmupCommand().schedule();
+        CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     }
 
     private void configureBindings() {
@@ -237,8 +233,8 @@ public class RobotContainer {
         // End-of-shift warning - FRC 6328
         for (int i = 1; i <= 5; i++) {
         double time = i;
-        Trigger shiftAboutToEnd =
-            new Trigger(() -> (HubShiftUtil.getShiftedShiftInfo().remainingTime() < time));
+        Trigger shiftAboutToEnd = new Trigger(() -> (HubShiftUtil.getShiftedShiftInfo().remainingTime() < time));
+
         shiftAboutToEnd
             .and(RobotModeTriggers.teleop())
             .onTrue(
@@ -252,20 +248,6 @@ public class RobotContainer {
         RobotModeTriggers.teleop().onTrue(Commands.runOnce(HubShiftUtil::initialize));
         RobotModeTriggers.autonomous().onTrue(Commands.runOnce(HubShiftUtil::initialize));
         RobotModeTriggers.disabled().onTrue(Commands.runOnce(HubShiftUtil::initialize).ignoringDisable(true));
-
-        // Seed Limelight while disabled, fuse when enabled
-        RobotModeTriggers.disabled()
-            .whileTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-left", 1)));
-        RobotModeTriggers.disabled()
-            .whileTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-right", 1)));
-        RobotModeTriggers.autonomous()
-            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-left", 3)));
-        RobotModeTriggers.autonomous()
-            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-right", 3)));
-        RobotModeTriggers.teleop()
-            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-left", 4)));
-        RobotModeTriggers.teleop()
-            .onTrue(Commands.runOnce(() -> LimelightHelpers.SetIMUMode("limelight-right", 4)));
             
         RobotModeTriggers.teleop()
             .onTrue(Commands.runOnce(() -> turret.toggleHood(false)));
