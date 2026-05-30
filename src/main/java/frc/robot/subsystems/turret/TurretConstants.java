@@ -36,7 +36,7 @@ public class TurretConstants {
     turretConfig.MotionMagic.MotionMagicCruiseVelocity = 10.5;
     turretConfig.MotionMagic.MotionMagicAcceleration = 8;
 
-    turretConfig.Feedback.SensorToMechanismRatio = 35;
+    turretConfig.Feedback.SensorToMechanismRatio = 38.334;
   }
 
   public static final TalonFXConfiguration hoodConfig = new TalonFXConfiguration();
