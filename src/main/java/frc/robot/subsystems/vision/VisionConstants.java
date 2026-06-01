@@ -14,7 +14,7 @@ import edu.wpi.first.math.util.Units;
 public class VisionConstants {
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout =
-      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+      AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
   public static double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
 
   // Camera names, must match names configured on coprocessor
