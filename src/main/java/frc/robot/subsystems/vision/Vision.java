@@ -67,8 +67,7 @@ public class Vision extends SubsystemBase {
     this.disconnectedAlerts = new Notification[photons.length];
     for (int i = 0; i < inputs.length; i++) {
       disconnectedAlerts[i] =
-          new Notification(
-              NotificationLevel.WARNING, "CAMERA DISCONNECTED" , " PhotonCamera " + Integer.toString(i) + " is disconnected.");
+          new Notification(NotificationLevel.WARNING, "CAMERA DISCONNECTED" , "Camera " + Integer.toString(i) + " is disconnected.");
     }
   }
 
