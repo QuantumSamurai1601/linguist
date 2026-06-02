@@ -46,6 +46,28 @@ public class VisionConstants {
   public static Rectangle2d RED_BOT_TRENCH = new Rectangle2d(RED_TRENCH_BR_COR, RED_TRENCH_TL_COR);
   public static Rectangle2d RED_TOP_TRENCH = new Rectangle2d(AllianceFlipUtil.flipY(RED_TRENCH_BR_COR), AllianceFlipUtil.flipY(RED_TRENCH_TL_COR)); // (TR, BL)
 
+  public static double TRENCH_ALIGN_X_LOOKAHEAD_SEC = 0.5;
+
+  public static Translation2d getClosestTrench(Translation2d current) {
+    Rectangle2d[] trenches = {
+        BLUE_BOT_TRENCH,
+        BLUE_TOP_TRENCH,
+        RED_BOT_TRENCH,
+        RED_TOP_TRENCH
+        };
+    Rectangle2d closestTrench = trenches[0];
+    double closestDistance = closestTrench.getDistance(current);
+
+    for (int i = 1; i < trenches.length; i++) {
+      double distance = trenches[i].getDistance(current);
+      if (distance < closestDistance) {
+        closestTrench = trenches[i];
+        closestDistance = distance;
+      }
+    }
+    return closestTrench.getCenter().getTranslation();
+  }
+
   // Camera names, must match names configured on coprocessor
   public static String camera0Name = "photon-left"; // 10.16.1.11
   public static String camera1Name = "photon-right"; // 10.16.1.12
