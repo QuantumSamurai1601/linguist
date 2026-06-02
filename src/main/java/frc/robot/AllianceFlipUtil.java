@@ -10,19 +10,37 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.subsystems.vision.VisionConstants;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 public class AllianceFlipUtil {
   public static double applyX(double x) {
-    return shouldFlip() ? VisionConstants.aprilTagLayout.getFieldLength() - x : x;
+    return shouldFlip() ? FIELD_LENGTH - x : x;
   }
 
   public static double applyY(double y) {
-    return shouldFlip() ? VisionConstants.aprilTagLayout.getFieldWidth() - y : y;
+    return shouldFlip() ? FIELD_WIDTH - y : y;
+  }
+
+  public static double flipX(double x) {
+    return FIELD_LENGTH - x;
+  }
+  
+  public static double flipY(double y) {
+    return FIELD_WIDTH - y;
   }
 
   public static Translation2d apply(Translation2d translation) {
     return new Translation2d(applyX(translation.getX()), applyY(translation.getY()));
+  }
+
+  public static Translation2d flip(Translation2d translation) {
+    return new Translation2d(flipX(translation.getX()), flipY(translation.getY()));
+  }
+  public static Translation2d flipX(Translation2d translation) {
+    return new Translation2d(flipX(translation.getX()), translation.getY());
+  }
+  public static Translation2d flipY(Translation2d translation) {
+    return new Translation2d(translation.getX(), flipY(translation.getY()));
   }
 
   public static Rotation2d apply(Rotation2d rotation) {
