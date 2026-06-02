@@ -7,15 +7,44 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.AllianceFlipUtil;
 
 public class VisionConstants {
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+  public static double FIELD_LENGTH = aprilTagLayout.getFieldLength();
   public static double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
+
+  // Trench shenanigans pray to god...
+  // Robot center w/ intake extended is 21.75 which is half of 43.5
+  // 35 (Bot Width) + 11 (Intake Extend) - 3.75 (1 Bumper) + 1.5 (Tolerance) = 43.5
+
+  // .        . (X1, Y2) (X2,Y2)
+  //
+  //
+  // .        . (X1, Y1) (X2, Y1)
+  public static double BLUE_TRENCH_X1 = Units.inchesToMeters(138.06); // Blue trench tape X line at 156.06 - 18 (1/2 Robot)
+  public static double BLUE_TRENCH_X2 = Units.inchesToMeters(225.06); // Blue trench neutral X line at 207.06 + 18
+  public static double RED_TRENCH_X1 = AllianceFlipUtil.flipX(BLUE_TRENCH_X1);
+  public static double RED_TRENCH_X2 = AllianceFlipUtil.flipX(BLUE_TRENCH_X2);
+  public static double TRENCH_Y_BOTTOM1 = Units.inchesToMeters(16); // Blue trench wall Y at 0 + 18 - 2
+  public static double TRENCH_Y_BOTTOM2 = Units.inchesToMeters(33.82); // Blue trench triangle Y at 49.82 - 18 + 2
+
+  public static Translation2d BLUE_TRENCH_BL_COR = new Translation2d(BLUE_TRENCH_X1, TRENCH_Y_BOTTOM1); // Bottom left
+  public static Translation2d BLUE_TRENCH_TR_COR = new Translation2d(BLUE_TRENCH_X2, TRENCH_Y_BOTTOM2); // Top right
+  public static Translation2d RED_TRENCH_BR_COR = new Translation2d(RED_TRENCH_X1, TRENCH_Y_BOTTOM1); // Bottom right
+  public static Translation2d RED_TRENCH_TL_COR = new Translation2d(RED_TRENCH_X2, TRENCH_Y_BOTTOM2); // Top left
+
+  public static Rectangle2d BLUE_BOT_TRENCH = new Rectangle2d(BLUE_TRENCH_BL_COR, BLUE_TRENCH_TR_COR);
+  public static Rectangle2d BLUE_TOP_TRENCH = new Rectangle2d(AllianceFlipUtil.flipY(BLUE_TRENCH_BL_COR), AllianceFlipUtil.flipY(BLUE_TRENCH_TR_COR)); // (TL, BR)
+  public static Rectangle2d RED_BOT_TRENCH = new Rectangle2d(RED_TRENCH_BR_COR, RED_TRENCH_TL_COR);
+  public static Rectangle2d RED_TOP_TRENCH = new Rectangle2d(AllianceFlipUtil.flipY(RED_TRENCH_BR_COR), AllianceFlipUtil.flipY(RED_TRENCH_TL_COR)); // (TR, BL)
 
   // Camera names, must match names configured on coprocessor
   public static String camera0Name = "photon-left"; // 10.16.1.11
