@@ -20,6 +20,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -234,14 +235,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // public void toggleVisionFilters(boolean shouldEnableFilters) {
     //     m_visionFiltersEnabled = shouldEnableFilters;
     // }
+    private Translation2d getFutureXTranslation(Translation2d current, double xVel, double time) {
+        double dx = xVel * time; // Speed * time is distance traveled in that time (delta x)
+        return current.plus(new Translation2d(dx, 0));
+    }
 
-    public boolean isInTrenchZone() {
+    // True if robot X will be in zone in 0.5 secs AND robot Y already in zone
+    public boolean willBeInTrenchZone() {
         var driveState = this.getState();
         var pose = driveState.Pose;
-        return BLUE_BOT_TRENCH.contains(pose.getTranslation()) 
-                || BLUE_TOP_TRENCH.contains(pose.getTranslation())
-                || RED_BOT_TRENCH.contains(pose.getTranslation())
-                || RED_TOP_TRENCH.contains(pose.getTranslation());
+        var fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(driveState.Speeds, pose.getRotation());
+
+        return BLUE_BOT_TRENCH.contains(getFutureXTranslation(pose.getTranslation(), fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC)) 
+            || BLUE_TOP_TRENCH.contains(getFutureXTranslation(pose.getTranslation(), fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC))
+            || RED_BOT_TRENCH.contains(getFutureXTranslation(pose.getTranslation(), fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC))
+            || RED_TOP_TRENCH.contains(getFutureXTranslation(pose.getTranslation(), fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC));
     }
 
     /**
