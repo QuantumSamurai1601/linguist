@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -22,7 +23,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -51,7 +51,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
-    private boolean m_visionFiltersEnabled = false;
+    // private boolean m_visionFiltersEnabled = false;
 
     /** Swerve request to apply during robot-centric path following */
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
@@ -231,8 +231,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
     }
 
-    public void toggleVisionFilters(boolean shouldEnableFilters) {
-        m_visionFiltersEnabled = shouldEnableFilters;
+    // public void toggleVisionFilters(boolean shouldEnableFilters) {
+    //     m_visionFiltersEnabled = shouldEnableFilters;
+    // }
+
+    public boolean isInTrenchZone() {
+        var driveState = this.getState();
+        var pose = driveState.Pose;
+        return BLUE_BOT_TRENCH.contains(pose.getTranslation()) 
+                || BLUE_TOP_TRENCH.contains(pose.getTranslation())
+                || RED_BOT_TRENCH.contains(pose.getTranslation())
+                || RED_TOP_TRENCH.contains(pose.getTranslation());
     }
 
     /**
@@ -333,23 +342,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs
-    ) { 
-        if (m_visionFiltersEnabled) {
-        var estimatedPose = samplePoseAt(timestampSeconds);
-        if (estimatedPose.isPresent()) {
-            var errorMeters = estimatedPose.get().getTranslation().getDistance(visionRobotPoseMeters.getTranslation());
-            var teleportClamp = Units.inchesToMeters(6.7);
-            var driveState = this.getState();
-            if (DriverStation.isTeleop()) {teleportClamp = 0.15;}
-            if (errorMeters > teleportClamp
-                || driveState.Speeds.omegaRadiansPerSecond > Units.degreesToRadians(180) 
-                || driveState.Speeds.vxMetersPerSecond > 2.67 
-                || driveState.Speeds.vyMetersPerSecond > 2.67) {
-                return;
-            }
-        }
+    ) {
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
-        }
     }
 
     /**
