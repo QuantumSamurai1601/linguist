@@ -74,9 +74,9 @@ public class VisionConstants {
   }
 
   // Camera names, must match names configured on coprocessor
-  public static String camera0Name = "photon-left"; // 10.16.1.11
-  public static String camera1Name = "photon-right"; // 10.16.1.12
-  public static String camera2Name = "photon-turret"; // 10.16.1.13
+  public static String camera0Name = "photoncam-left"; // 10.16.1.11
+  public static String camera1Name = "photoncam-right"; // 10.16.1.12
+  public static String camera2Name = "photoncam-turret"; // 10.16.1.13
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
