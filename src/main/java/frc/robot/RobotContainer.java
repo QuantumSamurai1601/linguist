@@ -10,6 +10,9 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -47,10 +50,15 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    private final SwerveRequest.FieldCentricFacingAngle trenchDrive = new SwerveRequest.FieldCentricFacingAngle()
+            .withHeadingPID(10, 0, 0)
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+            .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     // private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
     //         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+    private final PhoenixPIDController yVelocityController = new PhoenixPIDController(3, 0, 0);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -155,6 +163,31 @@ public class RobotContainer {
             )
         );
 
+        new Trigger(drivetrain::willBeInTrenchZone)
+            .and(joystick.rightTrigger(0.3).negate()) // Not shooting
+            .and(drivetrain.currentValidTrench::isPresent) // Has calculated the closest trench
+            .debounce(0.1)
+            .whileTrue(Commands.parallel(
+                Commands.sequence(
+                    intake.stowIntake(),
+                    Commands.waitSeconds(0.1)
+                ).onlyIf(() -> {
+                    var offsetAngle = drivetrain.driveState.Pose.getRotation().getDegrees(); // Angle magnitude from 0 or 180
+                    return intake.isIntakeExtended
+                        && Math.abs(offsetAngle) > TRENCH_ALIGN_INTAKE_RETRACT_DEG 
+                        && Math.abs(offsetAngle) < 180.0 - TRENCH_ALIGN_INTAKE_RETRACT_DEG;
+                }),
+                drivetrain.applyRequest(() ->
+                    trenchDrive.withTargetDirection(drivetrain.currentValidTrench.get().getRotation())
+                        .withVelocityX(-joystick.getLeftY() * MaxSpeed * 0.67)
+                        .withVelocityY(yVelocityController.calculate(
+                            drivetrain.getState().Pose.getY(), 
+                            drivetrain.currentValidTrench.get().getY(), 
+                            Utils.getCurrentTimeSeconds()
+                        ))
+                )
+            ));
+
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
@@ -172,8 +205,8 @@ public class RobotContainer {
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-        joystick.rightBumper().whileTrue(drivetrain.runOnce(() -> drivetrain.toggleVisionFilters(false))
-            .finallyDo(() -> drivetrain.toggleVisionFilters(true)));
+        // joystick.rightBumper().whileTrue(drivetrain.runOnce(() -> drivetrain.toggleVisionFilters(false))
+        //     .finallyDo(() -> drivetrain.toggleVisionFilters(true)));
 
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
 
