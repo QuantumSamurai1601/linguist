@@ -4,6 +4,8 @@
 //-90 to -103 if -180 to 180
 package frc.robot.subsystems.turret;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -40,9 +42,9 @@ public class Turret extends SubsystemBase {
   private NetworkTable turretTable = NetworkTableInstance.getDefault().getTable("Turret");
   private BooleanPublisher isTrackingPub = turretTable.getBooleanTopic("Tracking Enabled").publish();
   private StringPublisher trackedTargetPub = turretTable.getStringTopic("Tracked Target").publish();
-  private StringPublisher distanceToTrackedPub = turretTable.getStringTopic("Tracked Target Dist.").publish();
-  private StringPublisher hoodPosRotPub = turretTable.getStringTopic("Hood Position").publish();
-  private StringPublisher shooterVelRpsPub = turretTable.getStringTopic("Shooter Speed").publish();
+  // private StringPublisher distanceToTrackedPub = turretTable.getStringTopic("Tracked Target Dist.").publish();
+  // private StringPublisher hoodPosRotPub = turretTable.getStringTopic("Hood Position").publish();
+  // private StringPublisher shooterVelRpsPub = turretTable.getStringTopic("Shooter Speed").publish();
   private BooleanPublisher turretReadyPub = turretTable.getBooleanTopic("Turret Ready?").publish();
   private BooleanPublisher hubActiveOrFerryPub = turretTable.getBooleanTopic("Hub Active OR Ferry").publish();
   private BooleanPublisher canShootPub = turretTable.getBooleanTopic("Can Shoot?").publish();
@@ -64,6 +66,10 @@ public class Turret extends SubsystemBase {
   private final PositionVoltage hoodRequest = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
   private final VelocityVoltage shooterLeaderRequest = new VelocityVoltage(0).withSlot(0).withEnableFOC(true);
   private final Follower shooterFollowerRequest = new Follower(29, MotorAlignmentValue.Opposed);
+
+  private final StatusSignal<Boolean> turretForwardSoftLimit = turret.getFault_ForwardSoftLimit(false);
+  private final StatusSignal<Boolean> turretReverseSoftLimit = turret.getFault_ReverseSoftLimit(false);
+  private final StatusSignal<Double> turretClosedLoopError = turret.getClosedLoopError(false);
 
   private final Debouncer canShootDebounce = new Debouncer(0.1);
   private final CommandSwerveDrivetrain drivetrain;
@@ -96,7 +102,7 @@ public class Turret extends SubsystemBase {
     double finalOffsetAngleRot = Units.degreesToRotations(targetAngleDeg);
     var softLimits = TurretConstants.turretConfig.SoftwareLimitSwitch;
 
-    if (turret.getFault_ForwardSoftLimit().getValue() || turret.getFault_ReverseSoftLimit().getValue()) {
+    if (turretForwardSoftLimit.getValue() || turretReverseSoftLimit.getValue()) {
       double turretForwardLimitRot = softLimits.ForwardSoftLimitThreshold;
       double turretReverseLimitRot = softLimits.ReverseSoftLimitThreshold;
 
@@ -300,25 +306,18 @@ public class Turret extends SubsystemBase {
   }
   
   public void setTurretTargetingMode() {
-    Pose2d robotPose = driveState.Pose;
+    double robotPoseX = driveState.Pose.getX();
     double targetingSwitchX = AllianceFlipUtil.applyX(Units.inchesToMeters(180.0));
+    boolean isRedAlliance = AllianceFlipUtil.shouldFlip();
 
-    if (AllianceFlipUtil.shouldFlip()) {
-        if (robotPose.getX() > targetingSwitchX) {
-            trackHub();
-            trackingTarget = TrackingState.HUB;
-        } else {
-            trackFerry();
-            trackingTarget = TrackingState.FERRY;
-        }
+    boolean targetHub = isRedAlliance ? (robotPoseX > targetingSwitchX) : (robotPoseX < targetingSwitchX);
+
+    if (targetHub) {
+      trackHub();
+      trackingTarget = TrackingState.HUB;
     } else {
-        if (robotPose.getX() < targetingSwitchX) {
-            trackHub();
-            trackingTarget = TrackingState.HUB;
-        } else {
-            trackFerry();
-            trackingTarget = TrackingState.FERRY;
-        }
+      trackFerry();
+      trackingTarget = TrackingState.FERRY;
     }
   }
 
@@ -335,7 +334,7 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean readyToShoot() {
-    turretReady = Math.abs(turret.getClosedLoopError().getValueAsDouble()) < TurretConstants.TURRET_READY_TOLERANCE_ROT;
+    turretReady = Math.abs(turretClosedLoopError.getValueAsDouble()) < TurretConstants.TURRET_READY_TOLERANCE_ROT;
 
     hubActiveOrFerrying = (trackingTarget == TrackingState.HUB && HubShiftUtil.getShiftedShiftInfo().active())
         || trackingTarget == TrackingState.FERRY
@@ -351,14 +350,20 @@ public class Turret extends SubsystemBase {
     // This method will be called once per scheduler run
     driveState = drivetrain.getState();
 
+    BaseStatusSignal.refreshAll(
+      turretForwardSoftLimit,
+      turretReverseSoftLimit,
+      turretClosedLoopError
+    );
+
     if (enableTracking) {setTurretTargetingMode();}
     if (enableHood) {setHoodPosRot();}
 
     isTrackingPub.set(enableTracking);
     trackedTargetPub.set(trackingTarget.toString());
-    distanceToTrackedPub.set(String.format("%.2f", distanceToTrackedTarget));
-    hoodPosRotPub.set(String.format("%.3f", hood.getPosition().getValueAsDouble()));
-    shooterVelRpsPub.set(String.format("%.2f", shooterLeader.getVelocity().getValueAsDouble()));
+    // distanceToTrackedPub.set(String.format("%.2f", distanceToTrackedTarget));
+    // hoodPosRotPub.set(String.format("%.3f", hood.getPosition().getValueAsDouble()));
+    // shooterVelRpsPub.set(String.format("%.2f", shooterLeader.getVelocity().getValueAsDouble()));
 
     turretReadyPub.set(turretReady);
     hubActiveOrFerryPub.set(hubActiveOrFerrying);
