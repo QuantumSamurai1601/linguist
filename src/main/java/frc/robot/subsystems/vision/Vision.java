@@ -15,6 +15,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.StructArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Elastic;
 import frc.robot.Elastic.Notification;
@@ -40,6 +41,8 @@ public class Vision extends SubsystemBase {
   private final StructArrayLogEntry<Pose3d> summaryRobotPosesLog;
   private final StructArrayLogEntry<Pose3d> summaryRobotPosesAcceptedLog;
   private final StructArrayLogEntry<Pose3d> summaryRobotPosesRejectedLog;
+
+  private final Timer notificationTimer = new Timer();
 
   public Vision(VisionConsumer consumer, VisionPhoton... photons) {
     this.consumer = consumer;
@@ -67,8 +70,10 @@ public class Vision extends SubsystemBase {
     this.disconnectedAlerts = new Notification[photons.length];
     for (int i = 0; i < inputs.length; i++) {
       disconnectedAlerts[i] =
-          new Notification(NotificationLevel.WARNING, "CAMERA DISCONNECTED" , "Camera " + Integer.toString(i) + " is disconnected.");
+          new Notification(NotificationLevel.WARNING, "CAMERA DISCONNECTED" , "Camera " + Integer.toString(i) + " is disconnected.", 4500);
     }
+
+    notificationTimer.start();
   }
 
   @Override
@@ -87,7 +92,10 @@ public class Vision extends SubsystemBase {
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < photons.length; cameraIndex++) {
       // Update disconnected alert
-      if (!inputs[cameraIndex].connected) {Elastic.sendNotification(disconnectedAlerts[cameraIndex]);}
+      if (!inputs[cameraIndex].connected && notificationTimer.hasElapsed(5)) {
+        Elastic.sendNotification(disconnectedAlerts[cameraIndex]); 
+        notificationTimer.restart();
+      }
 
       List<Pose3d> tagPoses = new ArrayList<>();
       List<Pose3d> robotPoses = new ArrayList<>();
