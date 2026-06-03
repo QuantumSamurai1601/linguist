@@ -6,8 +6,10 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rectangle2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -47,8 +49,9 @@ public class VisionConstants {
   public static Rectangle2d RED_TOP_TRENCH = new Rectangle2d(AllianceFlipUtil.flipY(RED_TRENCH_BR_COR), AllianceFlipUtil.flipY(RED_TRENCH_TL_COR)); // (TR, BL)
 
   public static double TRENCH_ALIGN_X_LOOKAHEAD_SEC = 0.5;
+  public static double TRENCH_ALIGN_INTAKE_RETRACT_DEG = 20;
 
-  public static Translation2d getClosestTrench(Translation2d current) {
+  public static Pose2d getClosestTrenchPose(Pose2d current) {
     Rectangle2d[] trenches = {
         BLUE_BOT_TRENCH,
         BLUE_TOP_TRENCH,
@@ -56,16 +59,18 @@ public class VisionConstants {
         RED_TOP_TRENCH
         };
     Rectangle2d closestTrench = trenches[0];
-    double closestDistance = closestTrench.getDistance(current);
+    double closestDistance = closestTrench.getDistance(current.getTranslation());
+    Rotation2d closestRotation = Math.abs(current.getRotation().getDegrees()) <= (90) ? Rotation2d.kZero : Rotation2d.k180deg;
 
     for (int i = 1; i < trenches.length; i++) {
-      double distance = trenches[i].getDistance(current);
+      double distance = trenches[i].getDistance(current.getTranslation());
       if (distance < closestDistance) {
         closestTrench = trenches[i];
         closestDistance = distance;
       }
     }
-    return closestTrench.getCenter().getTranslation();
+
+    return new Pose2d(closestTrench.getCenter().getTranslation(), closestRotation);
   }
 
   // Camera names, must match names configured on coprocessor
