@@ -105,6 +105,12 @@ public class TurretConstants {
     hoodTreeMap.put(2.75, 0.038);
     hoodTreeMap.put(3.75, 0.054);
     hoodTreeMap.put(4.75, 0.056);
+    hoodTreeMap.put(5.75, 0.060);
+    hoodTreeMap.put(6.75, 0.075);
+    hoodTreeMap.put(7.75, 0.085);
+    hoodTreeMap.put(8.75, 0.085);
+    hoodTreeMap.put(9.75, 0.085);
+    hoodTreeMap.put(10.75, 0.085);
   }
 
   public static final double TURRET_ZERO_OFFSET_DEG = 90.0;
