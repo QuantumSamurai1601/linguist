@@ -30,11 +30,11 @@ public class TurretConstants {
     turretConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = false; // Change after tuning
     turretConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false; // Change after turning
 
-    turretConfig.Slot0.kS = 0.28;
+    turretConfig.Slot0.kS = 0.26;
     turretConfig.Slot0.kP = 50;
     turretConfig.Slot0.kD = 0;
-    turretConfig.MotionMagic.MotionMagicCruiseVelocity = 10.5;
-    turretConfig.MotionMagic.MotionMagicAcceleration = 8;
+    turretConfig.MotionMagic.MotionMagicCruiseVelocity = 12;
+    turretConfig.MotionMagic.MotionMagicAcceleration = 9;
 
     turretConfig.Feedback.SensorToMechanismRatio = 38.334;
   }
