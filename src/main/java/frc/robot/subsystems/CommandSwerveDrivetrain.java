@@ -53,6 +53,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
     // private boolean m_visionFiltersEnabled = false;
+    public Optional<Pose2d> currentValidTrench = Optional.empty();
+    public SwerveDriveState driveState;
 
     /** Swerve request to apply during robot-centric path following */
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
@@ -143,6 +145,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
         configureAutoBuilder();
+        driveState = this.getState();
     }
 
     /**
@@ -242,14 +245,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     // True if robot X will be in zone in 0.5 secs AND robot Y already in zone
     public boolean willBeInTrenchZone() {
-        var driveState = this.getState();
-        var pose = driveState.Pose;
-        var fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(driveState.Speeds, pose.getRotation());
+        var translation = driveState.Pose.getTranslation();
+        var fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(driveState.Speeds, driveState.Pose.getRotation());
+        var willBeInZone = BLUE_BOT_TRENCH.contains(getFutureXTranslation(translation, fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC)) 
+            || BLUE_TOP_TRENCH.contains(getFutureXTranslation(translation, fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC))
+            || RED_BOT_TRENCH.contains(getFutureXTranslation(translation, fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC))
+            || RED_TOP_TRENCH.contains(getFutureXTranslation(translation, fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC));
 
-        return BLUE_BOT_TRENCH.contains(getFutureXTranslation(pose.getTranslation(), fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC)) 
-            || BLUE_TOP_TRENCH.contains(getFutureXTranslation(pose.getTranslation(), fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC))
-            || RED_BOT_TRENCH.contains(getFutureXTranslation(pose.getTranslation(), fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC))
-            || RED_TOP_TRENCH.contains(getFutureXTranslation(pose.getTranslation(), fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC));
+        currentValidTrench = (willBeInZone) ? Optional.of(getClosestTrenchPose(driveState.Pose)) : Optional.empty();
+        return willBeInZone;
     }
 
     /**
@@ -303,6 +307,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+        driveState = this.getState();
     }
 
     private void startSimThread() {
