@@ -94,7 +94,7 @@ public class Turret extends SubsystemBase {
     turret.setPosition(0);
   }
 
-  public double convertToLegalTurretSetpointDeg(double targetAngleDeg) {
+  public double convertDegToLegalTurretSetpointRot(double targetAngleDeg) {
     targetAngleDeg =
         MathUtil.inputModulus(
             targetAngleDeg + TurretConstants.TURRET_ZERO_OFFSET_DEG, 0.0, 360.0);
@@ -193,7 +193,7 @@ public class Turret extends SubsystemBase {
   }
 
   public void setTurretPosDeg(double deg) {
-    turretTargetRot = convertToLegalTurretSetpointDeg(deg);
+    turretTargetRot = convertDegToLegalTurretSetpointRot(deg);
     turret.setControl(turretRequest.withPosition(turretTargetRot));
   }
 
