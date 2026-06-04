@@ -3,108 +3,116 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.424459625986367,
+        "x": 3.683148407049498,
         "y": 7.427915773160361
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.424459625986366,
+        "x": 6.3064301546513875,
+        "y": 7.5345227061151965
+      },
+      "isLocked": false,
+      "linkedName": "BCMFLP1"
+    },
+    {
+      "anchor": {
+        "x": 7.869340101522843,
+        "y": 6.157013536379019
+      },
+      "prevControl": {
+        "x": 7.496250825968305,
+        "y": 7.105288030007915
+      },
+      "nextControl": {
+        "x": 8.248026676726145,
+        "y": 5.194512484020359
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.9493062605752955,
+        "y": 3.5601438240270733
+      },
+      "prevControl": {
+        "x": 8.210642978003383,
+        "y": 3.5601438240270733
+      },
+      "nextControl": {
+        "x": 5.687882256429175,
+        "y": 3.5601438240270733
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.762165820642978,
+        "y": 5.548604060913706
+      },
+      "prevControl": {
+        "x": 5.765773522915671,
+        "y": 5.1592356791005525
+      },
+      "nextControl": {
+        "x": 5.75738600346582,
+        "y": 6.064475255086081
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.593164128595601,
+        "y": 7.062208121827411
+      },
+      "prevControl": {
+        "x": 6.241640232767914,
+        "y": 6.8401930297257145
+      },
+      "nextControl": {
+        "x": 7.157055837563451,
+        "y": 7.418350253807106
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.27,
         "y": 7.427915773160361
       },
-      "isLocked": false,
-      "linkedName": "MFLSTART"
-    },
-    {
-      "anchor": {
-        "x": 8.062250423011845,
-        "y": 6.557673434856176
-      },
       "prevControl": {
-        "x": 7.999840175436777,
-        "y": 7.733683389124529
-      },
-      "nextControl": {
-        "x": 8.101484433000907,
-        "y": 5.818378397811106
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 8.062250423011845,
-        "y": 4.9105160744500855
-      },
-      "prevControl": {
-        "x": 8.087222362357334,
-        "y": 5.397946027244261
-      },
-      "nextControl": {
-        "x": 8.049459235469897,
-        "y": 4.6608435178459064
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 8.062250423011845,
-        "y": 6.112495769881557
-      },
-      "prevControl": {
-        "x": 8.107229331871853,
-        "y": 5.689991052017539
-      },
-      "nextControl": {
-        "x": 7.989702977921729,
-        "y": 6.793962675069392
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 3.683148407049498,
-        "y": 7.427915773160361
-      },
-      "prevControl": {
-        "x": 7.559656874108214,
-        "y": 7.522079487441295
+        "x": 8.02011152200138,
+        "y": 7.435382269228403
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BCMFLP1"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.24598930481283424,
+      "waypointRelativePos": 0.31662269129287623,
       "rotationDegrees": 180.0
     },
     {
-      "waypointRelativePos": 0.9641839278371711,
-      "rotationDegrees": 75.0
+      "waypointRelativePos": 0.9213669495012778,
+      "rotationDegrees": 89.9
     },
     {
-      "waypointRelativePos": 2.4,
-      "rotationDegrees": 72.30481513818037
-    },
-    {
-      "waypointRelativePos": 3.715039577836412,
-      "rotationDegrees": 179.16713145968055
-    },
-    {
-      "waypointRelativePos": 3.8,
-      "rotationDegrees": 179.9589395504685
+      "waypointRelativePos": 2.86279683377309,
+      "rotationDegrees": -90.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.915430011939369,
-      "maxWaypointRelativePos": 2.2,
+      "minWaypointRelativePos": 1.030889267981373,
+      "maxWaypointRelativePos": 3.1333333333333426,
       "constraints": {
-        "maxVelocity": 1.4,
+        "maxVelocity": 2.0,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -116,8 +124,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 2.67,
+    "maxAcceleration": 7.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -125,7 +133,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": "BATTLECRY",
