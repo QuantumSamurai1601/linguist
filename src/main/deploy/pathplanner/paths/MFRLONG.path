@@ -144,7 +144,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "ONSEASON",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

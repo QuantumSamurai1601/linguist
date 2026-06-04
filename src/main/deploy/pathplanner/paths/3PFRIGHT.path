@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 7.552289712423017,
-        "y": 0.6803566961892724
+        "y": 0.6803566961892723
       },
       "nextControl": {
         "x": 7.88128630009404,
@@ -69,7 +69,7 @@
       },
       "prevControl": {
         "x": 7.282941143526021,
-        "y": 3.0374376063699793
+        "y": 3.037437606369979
       },
       "nextControl": {
         "x": 7.098326368399086,
@@ -210,7 +210,7 @@
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "ONSEASON",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

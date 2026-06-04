@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "MFLSHORT"
+                  "pathName": "BCMFL"
                 }
               }
             ]
@@ -43,25 +43,32 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "MFL2"
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "wait",
+                "type": "path",
                 "data": {
-                  "waitTime": 4.0
+                  "pathName": "BCMFLP2V1"
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "shootmfl"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 3.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "intakeretract"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -71,6 +78,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "ONSEASON",
+  "folder": "BATTLECRY",
   "choreoAuto": false
 }

@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.6633484202417836,
-        "y": 7.437410525430013
+        "x": 4.002719141323792,
+        "y": 7.427915773160361
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.286630167843673,
-        "y": 7.5440174583848485
+        "x": 6.626000888925681,
+        "y": 7.5345227061151965
       },
       "isLocked": false,
       "linkedName": "BBQCHICK"
@@ -80,12 +80,12 @@
     },
     {
       "anchor": {
-        "x": 3.6633484202417836,
-        "y": 7.437410525430013
+        "x": 4.002719141323792,
+        "y": 7.427915773160361
       },
       "prevControl": {
-        "x": 3.4134599422431653,
-        "y": 7.444877021498055
+        "x": 3.752830663325174,
+        "y": 7.435382269228403
       },
       "nextControl": null,
       "isLocked": false,
@@ -140,7 +140,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "ONSEASON",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

@@ -2,9 +2,14 @@
   "robotWidth": 0.889,
   "robotLength": 0.889,
   "holonomicMode": true,
-  "pathFolders": [],
-  "autoFolders": [],
-  "defaultMaxVel": 2.67,
+  "pathFolders": [
+    "BATTLECRY",
+    "ONSEASON"
+  ],
+  "autoFolders": [
+    "BATTLECRY",
+    "ONSEASON"
+  ],
   "defaultMaxAccel": 7.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
