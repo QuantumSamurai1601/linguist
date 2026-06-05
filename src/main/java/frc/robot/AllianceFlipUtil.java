@@ -36,9 +36,11 @@ public class AllianceFlipUtil {
   public static Translation2d flip(Translation2d translation) {
     return new Translation2d(flipX(translation.getX()), flipY(translation.getY()));
   }
+
   public static Translation2d flipX(Translation2d translation) {
     return new Translation2d(flipX(translation.getX()), translation.getY());
   }
+
   public static Translation2d flipY(Translation2d translation) {
     return new Translation2d(translation.getX(), flipY(translation.getY()));
   }
@@ -64,6 +66,15 @@ public class AllianceFlipUtil {
 
   public static Pose3d apply(Pose3d pose) {
     return new Pose3d(apply(pose.getTranslation()), apply(pose.getRotation()));
+  }
+  /**
+   * Negates a value if on the red alliance.
+   * 
+   * @param num Value to be negated
+   * @return Negated value if applicable
+   */
+  public static double apply(double num) {
+    return shouldFlip() ? -num : num;
   }
 
   public static Bounds apply(Bounds bounds) {
