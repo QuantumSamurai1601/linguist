@@ -11,6 +11,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
+import com.ctre.phoenix6.swerve.SwerveRequest.TargetDirectionPerspectiveValue;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -18,7 +19,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
-// import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -51,14 +51,15 @@ public class RobotContainer {
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.FieldCentricFacingAngle trenchDrive = new SwerveRequest.FieldCentricFacingAngle()
-            .withHeadingPID(10, 0, 0)
+            .withHeadingPID(7, 0, 0)
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-            .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
+            .withTargetDirectionPerspective(TargetDirectionPerspectiveValue.BlueAlliance)
+            .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance);
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     // private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
     //         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    private final PhoenixPIDController yVelocityController = new PhoenixPIDController(3, 0, 0);
+    private final PhoenixPIDController yVelocityController = new PhoenixPIDController(5, 0, 0);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -165,9 +166,9 @@ public class RobotContainer {
 
         new Trigger(drivetrain::willBeInTrenchZone)
             .and(joystick.rightTrigger(0.3).negate()) // Not shooting
-            .and(drivetrain.currentValidTrench::isPresent) // Has calculated the closest trench
             .debounce(0.1)
             .whileTrue(Commands.parallel(
+                Commands.print("Trench Zone Detected"),
                 Commands.sequence(
                     intake.stowIntake(),
                     Commands.waitSeconds(0.1)
@@ -177,12 +178,13 @@ public class RobotContainer {
                         && Math.abs(offsetAngle) > TRENCH_ALIGN_INTAKE_RETRACT_DEG 
                         && Math.abs(offsetAngle) < 180.0 - TRENCH_ALIGN_INTAKE_RETRACT_DEG;
                 }),
+                // Operator perspective is always blue for trench drive. Vel X is manually negated via util
                 drivetrain.applyRequest(() ->
                     trenchDrive.withTargetDirection(drivetrain.currentValidTrench.get().getRotation())
-                        .withVelocityX(-joystick.getLeftY() * MaxSpeed * 0.67)
+                        .withVelocityX(AllianceFlipUtil.apply(-joystick.getLeftY() * MaxSpeed * 0.67))
                         .withVelocityY(yVelocityController.calculate(
-                            drivetrain.getState().Pose.getY(), 
-                            drivetrain.currentValidTrench.get().getY(), 
+                            drivetrain.getState().Pose.getY(),
+                            drivetrain.currentValidTrench.get().getY(),
                             Utils.getCurrentTimeSeconds()
                         ))
                 )
