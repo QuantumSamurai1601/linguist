@@ -119,8 +119,6 @@ public class Vision extends SubsystemBase {
                     && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
                 || Math.abs(observation.pose().getZ())
                     > maxZError // Must have realistic Z coordinate
-                || observation.averageTagDistance() > maxTagDistance
-                // || observation.averageTagArea() > maxTagArea
 
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
