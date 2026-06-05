@@ -91,6 +91,10 @@ public class RobotContainer {
             intake.extendIntake()
         ));
 
+        NamedCommands.registerCommand("intakeretract", Commands.sequence(
+            intake.stowIntake()
+        ));
+
         NamedCommands.registerCommand("shootmfl", Commands.deadline(
             Commands.waitSeconds(4),
             Commands.sequence(
