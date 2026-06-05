@@ -59,7 +59,7 @@ public class RobotContainer {
     // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     // private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
     //         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    private final PhoenixPIDController yVelocityController = new PhoenixPIDController(5, 0, 0);
+    private final PhoenixPIDController yVelocityController = new PhoenixPIDController(8, 0, 0);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -99,7 +99,6 @@ public class RobotContainer {
             Commands.waitSeconds(4),
             Commands.sequence(
                 turret.runOnce(() -> turret.toggleHood(true)),
-                Commands.waitSeconds(0.2),
                 Commands.parallel(
                     hopper.runHopperShoot(),
                     tower.runTowerShoot()
@@ -117,7 +116,6 @@ public class RobotContainer {
             Commands.waitSeconds(4),
             Commands.sequence(
                 turret.runOnce(() -> turret.toggleHood(true)),
-                Commands.waitSeconds(0.2),
                 Commands.parallel(
                     hopper.runHopperShoot(),
                     tower.runTowerShoot()
@@ -135,7 +133,6 @@ public class RobotContainer {
             Commands.waitSeconds(4),
             Commands.sequence(
                 turret.runOnce(() -> turret.toggleHood(true)),
-                Commands.waitSeconds(0.2),
                 Commands.parallel(
                     hopper.runHopperShoot(),
                     tower.runTowerShoot()
@@ -243,7 +240,6 @@ public class RobotContainer {
             .and(turret::readyToShoot)
             .whileTrue(Commands.sequence(
                 turret.runOnce(() -> turret.toggleHood(true)),
-                Commands.waitSeconds(0.2),
                 Commands.parallel(
                     hopper.runHopperShoot(),
                     tower.runTowerShoot(),
