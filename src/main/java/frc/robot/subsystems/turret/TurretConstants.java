@@ -24,6 +24,8 @@ public class TurretConstants {
 
     turretConfig.CurrentLimits.SupplyCurrentLimit = 20;
     turretConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    turretConfig.CurrentLimits.StatorCurrentLimit = 40;
+    turretConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.923;
     turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
@@ -77,9 +79,9 @@ public class TurretConstants {
 
   public static final InterpolatingDoubleTreeMap shooterTreeMap = new InterpolatingDoubleTreeMap();
   static {
-    shooterTreeMap.put(1.75, 27.0);
-    shooterTreeMap.put(2.75, 31.0);
-    shooterTreeMap.put(3.75, 33.0);
+    shooterTreeMap.put(1.75, 26.0);
+    shooterTreeMap.put(2.75, 28.0);
+    shooterTreeMap.put(3.75, 32.0);
     shooterTreeMap.put(4.75, 35.0);
     shooterTreeMap.put(5.75, 37.0);
 
@@ -103,9 +105,9 @@ public class TurretConstants {
   static {
     hoodTreeMap.put(1.75, 0.005);
     hoodTreeMap.put(2.75, 0.038);
-    hoodTreeMap.put(3.75, 0.054);
-    hoodTreeMap.put(4.75, 0.056);
-    hoodTreeMap.put(5.75, 0.060);
+    hoodTreeMap.put(3.75, 0.048);
+    hoodTreeMap.put(4.75, 0.051);
+    hoodTreeMap.put(5.75, 0.058);
     hoodTreeMap.put(6.75, 0.075);
     hoodTreeMap.put(7.75, 0.085);
     hoodTreeMap.put(8.75, 0.085);
