@@ -3,106 +3,102 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.424459625986367,
-        "y": 7.427915773160361
+        "x": 4.427312646875241,
+        "y": 0.635
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.424459625986366,
-        "y": 7.427915773160361
+        "x": 7.424162436548224,
+        "y": 0.6368104906937377
       },
       "isLocked": false,
-      "linkedName": "MFLSTART"
+      "linkedName": "MFRSTART"
     },
     {
       "anchor": {
-        "x": 8.062250423011845,
-        "y": 6.557673434856176
+        "x": 7.928697123519459,
+        "y": 2.3581641285956016
       },
       "prevControl": {
-        "x": 7.999840175436777,
-        "y": 7.733683389124529
+        "x": 7.824822335025381,
+        "y": 1.1561844331641271
       },
       "nextControl": {
-        "x": 8.101484433000907,
-        "y": 5.818378397811106
+        "x": 7.963259005404576,
+        "y": 2.758094476123388
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.062250423011845,
-        "y": 4.9105160744500855
+        "x": 7.928697123519459,
+        "y": 3.5156260575296114
       },
       "prevControl": {
-        "x": 8.087222362357334,
-        "y": 5.397946027244261
+        "x": 7.910885361022483,
+        "y": 3.7649907324872944
       },
       "nextControl": {
-        "x": 8.049459235469897,
-        "y": 4.6608435178459064
+        "x": 7.946508886016435,
+        "y": 3.2662613825719276
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.062250423011845,
-        "y": 6.112495769881557
+        "x": 7.928697123519459,
+        "y": 2.3581641285956016
       },
       "prevControl": {
-        "x": 8.107229331871853,
-        "y": 5.689991052017539
+        "x": 7.909339651191247,
+        "y": 3.0114788196727678
       },
       "nextControl": {
-        "x": 7.989702977921729,
-        "y": 6.793962675069392
+        "x": 7.988054145516076,
+        "y": 0.35486463620981246
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.683148407049498,
-        "y": 7.427915773160361
+        "x": 3.6698307952622677,
+        "y": 0.635
       },
       "prevControl": {
-        "x": 7.559656874108214,
-        "y": 7.522079487441295
+        "x": 5.092545132904194,
+        "y": 0.6630259755515329
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BCMFLP1"
+      "linkedName": "BCMFRP1"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.48548812664907637,
+      "waypointRelativePos": 0.23218997361477572,
       "rotationDegrees": 180.0
     },
     {
-      "waypointRelativePos": 0.9641839278371711,
-      "rotationDegrees": 75.0
+      "waypointRelativePos": 0.8548812664907655,
+      "rotationDegrees": -69.90123851373191
     },
     {
-      "waypointRelativePos": 2.4,
-      "rotationDegrees": 72.30481513818037
+      "waypointRelativePos": 1.8575197889182005,
+      "rotationDegrees": -68.42208036081588
     },
     {
-      "waypointRelativePos": 3.715039577836412,
-      "rotationDegrees": 179.16713145968055
-    },
-    {
-      "waypointRelativePos": 3.8,
-      "rotationDegrees": 179.9589395504685
+      "waypointRelativePos": 3.6622691292875986,
+      "rotationDegrees": 180.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.915430011939369,
-      "maxWaypointRelativePos": 2.2,
+      "minWaypointRelativePos": 0.8799999999999996,
+      "maxWaypointRelativePos": 2.0,
       "constraints": {
         "maxVelocity": 1.4,
         "maxAcceleration": 3.0,
