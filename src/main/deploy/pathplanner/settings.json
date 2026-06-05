@@ -10,6 +10,7 @@
     "BATTLECRY",
     "ONSEASON"
   ],
+  "defaultMaxVel": 2.67,
   "defaultMaxAccel": 7.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
@@ -33,5 +34,7 @@
   "brModuleY": -0.267,
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
-  "robotFeatures": []
+  "robotFeatures": [
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":-0.545,\"y\":0.0},\"size\":{\"width\":0.6096,\"length\":0.1778},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":true}}"
+  ]
 }
