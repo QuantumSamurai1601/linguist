@@ -24,6 +24,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -54,6 +58,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private boolean m_hasAppliedOperatorPerspective = false;
     // private boolean m_visionFiltersEnabled = false;
     public Optional<Pose2d> currentValidTrench = Optional.empty();
+    // private NetworkTable trenchTable = NetworkTableInstance.getDefault().getTable("Trench Align");
+    // private BooleanPublisher isValidTrenchPresentPub = trenchTable.getBooleanTopic("Is Trench Valid?").publish();
+    // private StructPublisher<Pose2d> currentValidTrenchPub = trenchTable.getStructTopic("Current Trench", Pose2d.struct).publish();
+
     public SwerveDriveState driveState;
 
     /** Swerve request to apply during robot-centric path following */
@@ -252,7 +260,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             || RED_BOT_TRENCH.contains(getFutureXTranslation(translation, fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC))
             || RED_TOP_TRENCH.contains(getFutureXTranslation(translation, fieldSpeeds.vxMetersPerSecond, TRENCH_ALIGN_X_LOOKAHEAD_SEC));
 
-        currentValidTrench = (willBeInZone) ? Optional.of(getClosestTrenchPose(driveState.Pose)) : Optional.empty();
+        currentValidTrench = Optional.of(getClosestTrenchPose(driveState.Pose));
         return willBeInZone;
     }
 
@@ -307,6 +315,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+        // if (currentValidTrench.isPresent()) {
+        //     currentValidTrenchPub.set(currentValidTrench.get());
+        // }
+        // isValidTrenchPresentPub.set(currentValidTrench.isPresent());
+
         driveState = this.getState();
     }
 
