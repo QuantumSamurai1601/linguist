@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.860270727580372,
-        "y": 7.2847969543147215
+        "x": 6.934467005076142,
+        "y": 7.433189509306261
       },
       "isLocked": false,
       "linkedName": "BCMFLP1"
@@ -41,7 +41,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "BCMFLP1.5"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
@@ -58,7 +58,21 @@
       "rotationDegrees": 90.0
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.799999999999999,
+      "maxWaypointRelativePos": 1.626666666666666,
+      "constraints": {
+        "maxVelocity": 1.4,
+        "maxAcceleration": 7.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -71,7 +85,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": "BATTLECRY",
