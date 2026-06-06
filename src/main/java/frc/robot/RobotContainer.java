@@ -166,19 +166,20 @@ public class RobotContainer {
         );
 
         new Trigger(drivetrain::willBeInTrenchZone)
+            .and(RobotModeTriggers.teleop())
             .and(joystick.rightTrigger(0.3).negate()) // Not shooting
             .debounce(0.1)
             .whileTrue(Commands.parallel(
                 Commands.print("Trench Zone Detected"),
-                Commands.sequence(
-                    intake.stowIntake(),
-                    Commands.waitSeconds(0.1)
-                ).onlyIf(() -> {
-                    var offsetAngle = drivetrain.driveState.Pose.getRotation().getDegrees(); // Angle magnitude from 0 or 180
-                    return intake.isIntakeExtended
-                        && Math.abs(offsetAngle) > TRENCH_ALIGN_INTAKE_RETRACT_DEG 
-                        && Math.abs(offsetAngle) < 180.0 - TRENCH_ALIGN_INTAKE_RETRACT_DEG;
-                }),
+                // Commands.sequence(
+                //     intake.stowIntake(),
+                //     Commands.waitSeconds(0.1)
+                // ).onlyIf(() -> {
+                //     var offsetAngle = drivetrain.driveState.Pose.getRotation().getDegrees(); // Angle magnitude from 0 or 180
+                //     return intake.isIntakeExtended
+                //         && Math.abs(offsetAngle) > TRENCH_ALIGN_INTAKE_RETRACT_DEG 
+                //         && Math.abs(offsetAngle) < 180.0 - TRENCH_ALIGN_INTAKE_RETRACT_DEG;
+                // }),
                 // Operator perspective is always blue for trench drive. Vel X is manually negated via util
                 drivetrain.applyRequest(() ->
                     trenchDrive.withTargetDirection(drivetrain.currentValidTrench.get().getRotation())
