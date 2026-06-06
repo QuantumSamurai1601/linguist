@@ -118,7 +118,7 @@ public class TurretConstants {
 
   public static final double TURRET_ZERO_OFFSET_DEG = 90.0;
   public static final Translation2d ROBOT_TO_TURRET_METERS = new Translation2d(Units.inchesToMeters(5.21), 0);
-  public static final double TURRET_READY_TOLERANCE_ROT = Degrees.of(5).in(Rotations);
+  public static final double TURRET_READY_TOLERANCE_ROT = Degrees.of(4).in(Rotations);
   public static final double HOOD_READY_TOLERANCE_ROT = 0.01;
   public static final double SHOOTER_READY_TOLERANCE_RPS = 5.0;
   public static final double MAX_SHOT_READY_OMEGA_RAD_PER_SEC = RotationsPerSecond.of(0.5).in(RadiansPerSecond);
