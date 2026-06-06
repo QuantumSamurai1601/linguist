@@ -35,8 +35,8 @@ public class VisionConstants {
   public static double BLUE_TRENCH_X2 = Units.inchesToMeters(229.06); // Blue trench neutral X line at 207.06 + 18 + 4
   public static double RED_TRENCH_X1 = AllianceFlipUtil.flipX(BLUE_TRENCH_X1);
   public static double RED_TRENCH_X2 = AllianceFlipUtil.flipX(BLUE_TRENCH_X2);
-  public static double TRENCH_Y_BOTTOM1 = Units.inchesToMeters(14); // Blue trench wall Y at 0 + 18 - 4
-  public static double TRENCH_Y_BOTTOM2 = Units.inchesToMeters(35.82); // Blue trench triangle Y at 49.82 - 18 + 4
+  public static double TRENCH_Y_BOTTOM1 = Units.inchesToMeters(17); // Blue trench wall Y at 0 + 18 - 1
+  public static double TRENCH_Y_BOTTOM2 = Units.inchesToMeters(32.82); // Blue trench triangle Y at 49.82 - 18 + 1
 
   public static Translation2d BLUE_TRENCH_BL_COR = new Translation2d(BLUE_TRENCH_X1, TRENCH_Y_BOTTOM1); // Bottom left
   public static Translation2d BLUE_TRENCH_TR_COR = new Translation2d(BLUE_TRENCH_X2, TRENCH_Y_BOTTOM2); // Top right
