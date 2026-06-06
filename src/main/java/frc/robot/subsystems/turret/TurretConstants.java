@@ -79,11 +79,11 @@ public class TurretConstants {
 
   public static final InterpolatingDoubleTreeMap shooterTreeMap = new InterpolatingDoubleTreeMap();
   static {
-    shooterTreeMap.put(1.75, 26.0);
+    shooterTreeMap.put(1.75, 27.0);
     shooterTreeMap.put(2.75, 28.0);
-    shooterTreeMap.put(3.75, 32.0);
-    shooterTreeMap.put(4.75, 35.0);
-    shooterTreeMap.put(5.75, 37.0);
+    shooterTreeMap.put(3.75, 33.0);
+    shooterTreeMap.put(4.75, 36.0);
+    shooterTreeMap.put(5.75, 38.0);
 
     shooterTreeMap.put(6.75, 42.0);
     shooterTreeMap.put(7.75, 46.0);
