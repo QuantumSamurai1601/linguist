@@ -158,7 +158,19 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "hopperunstuck",
+      "waypointRelativePos": 6.25,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "hopperunstuck"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.67,
     "maxAcceleration": 7.0,

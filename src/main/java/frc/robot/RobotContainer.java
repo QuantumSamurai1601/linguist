@@ -142,7 +142,9 @@ public class RobotContainer {
             hopper.stopHopper();
             tower.stopTower();
             turret.toggleHood(false);
-        }));        
+        }));
+        
+        NamedCommands.registerCommand("hopperunstuck", hopper.runOnce(hopper::runHopperUnstuck));
 
         autoChooser = AutoBuilder.buildAutoChooser("MFRLONG");
         SmartDashboard.putData("Auto Mode", autoChooser);
