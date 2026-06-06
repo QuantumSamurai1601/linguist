@@ -81,7 +81,7 @@ public class TurretConstants {
   static {
     shooterTreeMap.put(1.75, 27.0);
     shooterTreeMap.put(2.75, 28.0);
-    shooterTreeMap.put(3.75, 33.0);
+    shooterTreeMap.put(3.75, 34.0);
     shooterTreeMap.put(4.75, 36.0);
     shooterTreeMap.put(5.75, 40.0);
 
@@ -106,10 +106,10 @@ public class TurretConstants {
     hoodTreeMap.put(1.75, 0.005);
     hoodTreeMap.put(2.75, 0.038);
     hoodTreeMap.put(3.75, 0.048);
-    hoodTreeMap.put(4.75, 0.051);
-    hoodTreeMap.put(5.75, 0.056);
+    hoodTreeMap.put(4.75, 0.050);
+    hoodTreeMap.put(5.75, 0.054);
 
-    hoodTreeMap.put(6.75, 0.075);
+    hoodTreeMap.put(6.75, 0.058);
     hoodTreeMap.put(7.75, 0.085);
     hoodTreeMap.put(8.75, 0.085);
     hoodTreeMap.put(9.75, 0.085);
