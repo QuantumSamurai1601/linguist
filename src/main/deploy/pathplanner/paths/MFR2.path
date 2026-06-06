@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.268516074455519,
-        "y": 0.5915190778459829
+        "x": 3.6985861545138894,
+        "y": 0.6201030092592601
       },
       "prevControl": null,
       "nextControl": {
-        "x": 9.268516074455519,
-        "y": 0.5915190778459829
+        "x": 4.698586154513889,
+        "y": 0.6201030092592601
       },
       "isLocked": false,
       "linkedName": "HONEYMUSTARDCHICKEN"
@@ -112,12 +112,12 @@
     },
     {
       "anchor": {
-        "x": 8.268516074455519,
-        "y": 0.5915190778459829
+        "x": 3.6985861545138894,
+        "y": 0.6201030092592601
       },
       "prevControl": {
-        "x": 9.59677324279315,
-        "y": 0.6289034768983077
+        "x": 5.02684332285152,
+        "y": 0.6574874083115849
       },
       "nextControl": null,
       "isLocked": false,
@@ -160,7 +160,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.67,
+    "maxVelocity": 3.67,
     "maxAcceleration": 7.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -169,13 +169,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": "ONSEASON",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

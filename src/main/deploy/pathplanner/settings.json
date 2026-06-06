@@ -10,7 +10,7 @@
     "BATTLECRY",
     "ONSEASON"
   ],
-  "defaultMaxVel": 2.67,
+  "defaultMaxVel": 3.67,
   "defaultMaxAccel": 7.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,

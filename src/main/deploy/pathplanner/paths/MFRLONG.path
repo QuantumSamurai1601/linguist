@@ -80,16 +80,16 @@
     },
     {
       "anchor": {
-        "x": 3.521166755413187,
-        "y": 0.5915190778459829
+        "x": 3.6985861545138894,
+        "y": 0.6201030092592601
       },
       "prevControl": {
-        "x": 4.810089058204934,
-        "y": 0.623282044587312
+        "x": 4.987508457305636,
+        "y": 0.6518659760005892
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "HONEYMUSTARDCHICKEN"
     }
   ],
   "rotationTargets": [
@@ -132,7 +132,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.67,
+    "maxVelocity": 3.67,
     "maxAcceleration": 7.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
