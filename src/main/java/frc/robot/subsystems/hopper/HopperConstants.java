@@ -23,5 +23,5 @@ public class HopperConstants {
 
   public static final double HOPPER_INTAKE_VELOCITY = 10;
   public static final double HOPPER_SHOOT_VELOCITY = 28;
-  public static final double HOPPER_UNSTUCK_VELOCITY = -24;
+  public static final double HOPPER_UNSTUCK_VELOCITY = -28;
 }
