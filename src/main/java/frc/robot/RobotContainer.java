@@ -247,8 +247,8 @@ public class RobotContainer {
                     hopper.runHopperShoot(),
                     tower.runTowerShoot(),
                     drivetrain.applyRequest(() ->
-                        drive.withVelocityX(-joystick.getLeftY() * MaxSpeed * 0.2) // Drive forward with negative Y (forward)
-                            .withVelocityY(-joystick.getLeftX() * MaxSpeed * 0.2) // Drive left with negative X (left)
+                        drive.withVelocityX(-joystick.getLeftY() * MaxSpeed * 0.35) // Drive forward with negative Y (forward)
+                            .withVelocityY(-joystick.getLeftX() * MaxSpeed * 0.35) // Drive left with negative X (left)
                             .withRotationalRate(-joystick.getRightX() * MaxAngularRate * 0.5) // Drive counterclockwise with negative X (left)
                     ).onlyWhile(() -> turret.trackingTarget == TrackingState.HUB)
                 )
