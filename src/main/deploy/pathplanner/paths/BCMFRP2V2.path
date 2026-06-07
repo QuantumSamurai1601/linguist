@@ -138,7 +138,19 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "intakeretract",
+      "waypointRelativePos": 4.002801724137932,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "intakeretract"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.67,
     "maxAcceleration": 7.0,
