@@ -4,8 +4,11 @@
 
 package frc.robot.subsystems.tower;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,9 +17,12 @@ import frc.robot.subsystems.hopper.HopperConstants;
 
 public class Tower extends SubsystemBase {
   private final TalonFX tower = new TalonFX(33);
+  // private final CANrange towerSensor = new CANrange(40);
 
   private final VelocityVoltage towerRequest = new VelocityVoltage(0).withSlot(0).withEnableFOC(true);
   private final NeutralOut neutral = new NeutralOut();
+
+  // private final StatusSignal<Boolean> fuelSensorHasFuel = towerSensor.getIsDetected(false);
 
   /** Creates a new Tower. */
   public Tower() {
@@ -39,8 +45,13 @@ public class Tower extends SubsystemBase {
     return this.runOnce(() -> this.setTowerVelocity(HopperConstants.HOPPER_UNSTUCK_VELOCITY));
   }
 
+  // public boolean hasFuel() {
+  //   return fuelSensorHasFuel.getValue();
+  // }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    // BaseStatusSignal.refreshAll(fuelSensorHasFuel);
   }
 }
