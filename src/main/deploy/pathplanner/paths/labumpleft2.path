@@ -1,0 +1,68 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.8589204545454545,
+        "y": 5.519181818181819
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.848613636363636,
+        "y": 6.817840909090909
+      },
+      "isLocked": false,
+      "linkedName": "reallabumpleft1"
+    },
+    {
+      "anchor": {
+        "x": 3.528863636363636,
+        "y": 7.415636363636363
+      },
+      "prevControl": {
+        "x": 2.745545454545454,
+        "y": 7.415636363636363
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "reallabumpleft2"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 0.7,
+        "maxAcceleration": 7.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 2.67,
+    "maxAcceleration": 7.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -0.09959142126213089
+  },
+  "reversed": false,
+  "folder": "roboreplay",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}

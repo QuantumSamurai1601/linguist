@@ -1,0 +1,159 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.528863636363636,
+        "y": 7.415636363636363
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.528863636363636,
+        "y": 7.415636363636363
+      },
+      "isLocked": false,
+      "linkedName": "reallabumpleft2"
+    },
+    {
+      "anchor": {
+        "x": 7.218704545454545,
+        "y": 6.859068181818182
+      },
+      "prevControl": {
+        "x": 7.046920604420608,
+        "y": 7.6637403266613635
+      },
+      "nextControl": {
+        "x": 7.414534090909091,
+        "y": 5.941761363636363
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.981886363636363,
+        "y": 4.395738636363636
+      },
+      "prevControl": {
+        "x": 5.94065909090909,
+        "y": 5.333659090909089
+      },
+      "nextControl": {
+        "x": 6.023113636363636,
+        "y": 3.4578181818181832
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.218704545454545,
+        "y": 3.323829545454546
+      },
+      "prevControl": {
+        "x": 6.657400652063875,
+        "y": 3.4156792734639274
+      },
+      "nextControl": {
+        "x": 7.785579545454545,
+        "y": 3.2310681818181832
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.342147727272726,
+        "y": 4.653409090909091
+      },
+      "prevControl": {
+        "x": 8.397514623487552,
+        "y": 3.7991769778803386
+      },
+      "nextControl": {
+        "x": 8.27,
+        "y": 5.766545454545455
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.971340909090909,
+        "y": 5.570715909090909
+      },
+      "prevControl": {
+        "x": 7.373306818181818,
+        "y": 5.570715909090909
+      },
+      "nextControl": {
+        "x": 6.002280730808757,
+        "y": 5.570715909090909
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.8589204545454545,
+        "y": 5.519181818181819
+      },
+      "prevControl": {
+        "x": 4.0648181818181826,
+        "y": 5.529488636363637
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "reallabumpleft1"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6415094339622642,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.150943396226415,
+      "rotationDegrees": 58.78020652087913
+    },
+    {
+      "waypointRelativePos": 1.9528301886792452,
+      "rotationDegrees": 109.8601528347026
+    },
+    {
+      "waypointRelativePos": 2.9056603773584904,
+      "rotationDegrees": -156.33794794468756
+    },
+    {
+      "waypointRelativePos": 3.8113207547169963,
+      "rotationDegrees": -70.03970181805288
+    },
+    {
+      "waypointRelativePos": 4.6603773584905674,
+      "rotationDegrees": 0.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 2.67,
+    "maxAcceleration": 7.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "roboreplay",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -0.09959142126213089
+  },
+  "useDefaultConstraints": true
+}
